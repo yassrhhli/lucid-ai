@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState, useCallback } from 'react';
 import {
   View,
@@ -124,7 +125,7 @@ export default function JournalScreen() {
         <LoadingSpinner label="Loading your dreams..." />
       ) : filtered.length === 0 ? (
         <View style={styles.empty}>
-          <Text style={styles.emptyEmoji}>🌙</Text>
+          <Ionicons name='moon-outline' size={64} color='#6b5fa6' />
           <Text style={styles.emptyTitle}>
             {search ? 'No dreams found' : 'No dreams yet'}
           </Text>

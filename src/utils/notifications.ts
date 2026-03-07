@@ -86,7 +86,7 @@ export async function cancelDreamReminder(): Promise<void> {
 export async function saveExpoPushToken(userId: string): Promise<void> {
   try {
     const tokenData = await Notifications.getExpoPushTokenAsync({
-      projectId: 'YOUR_EXPO_PROJECT_ID', // Remplacer par votre project ID
+      projectId: 'd26bb7b2-57d8-4b23-b94a-32b1ac90a674', // Remplacer par votre project ID
     });
 
     await supabase

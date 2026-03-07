@@ -1,4 +1,5 @@
 import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import {
   View,
   Text,
@@ -10,10 +11,17 @@ import { format } from 'date-fns';
 import type { Dream } from '@/types/dream';
 import { COLORS, FONT_SIZES, RADIUS, SPACING } from '@/constants/theme';
 
-const EMOTION_EMOJI: Record<string, string> = {
-  joy: '😄', fear: '😨', anxiety: '😰', peace: '😌',
-  sadness: '😢', excitement: '🤩', confusion: '😵',
-  anger: '😡', love: '🥰', wonder: '🌟',
+const EMOTION_ICON: Record<string, { name: string; color: string }> = {
+  joy:        { name: 'sunny',        color: '#fbbf24' },
+  fear:       { name: 'flash',        color: '#6366f1' },
+  anxiety:    { name: 'alert-circle', color: '#f97316' },
+  peace:      { name: 'leaf',         color: '#34d399' },
+  sadness:    { name: 'rainy',        color: '#60a5fa' },
+  excitement: { name: 'star',         color: '#f472b6' },
+  confusion:  { name: 'help-circle',  color: '#a78bfa' },
+  anger:      { name: 'flame',        color: '#ef4444' },
+  love:       { name: 'heart',        color: '#f472b6' },
+  wonder:     { name: 'sparkles',     color: '#818cf8' },
 };
 
 const QUALITY_COLOR: Record<number, string> = {
@@ -52,12 +60,12 @@ export function DreamCard({ dream, onLongPress }: DreamCardProps) {
             <View style={styles.badges}>
               {dream.is_lucid && (
                 <View style={styles.badge}>
-                  <Text style={styles.badgeText}>✨ Lucid</Text>
+                  <Text style={[styles.badgeText, { color: '#a78bfa' }]}>Lucid</Text>
                 </View>
               )}
               {dream.is_recurring && (
                 <View style={[styles.badge, styles.badgeRecurring]}>
-                  <Text style={styles.badgeText}>🔄 Recurring</Text>
+                  <Text style={styles.badgeText}>Recurring</Text>
                 </View>
               )}
             </View>
@@ -83,9 +91,7 @@ export function DreamCard({ dream, onLongPress }: DreamCardProps) {
           {dream.emotions.length > 0 && (
             <View style={styles.emotions}>
               {dream.emotions.slice(0, 3).map((e) => (
-                <Text key={e} style={styles.emotionEmoji}>
-                  {EMOTION_EMOJI[e] ?? '💭'}
-                </Text>
+                <Ionicons key={e} name={(EMOTION_ICON[e]?.name ?? 'ellipse') as any} size={12} color={EMOTION_ICON[e]?.color ?? '#6b7280'} />
               ))}
             </View>
           )}
@@ -140,7 +146,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   badges: { flexDirection: 'row', gap: SPACING.xs },
-  badge: {
+  badge: { flexDirection: 'row', alignItems: 'center', gap: 3,
     backgroundColor: COLORS.primaryDark + '33',
     borderRadius: RADIUS.sm,
     paddingHorizontal: 6,

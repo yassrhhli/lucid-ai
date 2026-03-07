@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
   View,
@@ -38,7 +39,7 @@ export function InterpretationCard({ dream, onSuccess }: InterpretationCardProps
   if (quotaExceeded) {
     return (
       <View style={styles.quotaCard}>
-        <Text style={styles.quotaEmoji}>⚡</Text>
+        <Ionicons name="flash" size={32} color="#fbbf24" />
         <Text style={styles.quotaTitle}>Weekly Limit Reached</Text>
         <Text style={styles.quotaSub}>
           You've used all {weeklyLimit} free interpretations this week.
@@ -47,7 +48,7 @@ export function InterpretationCard({ dream, onSuccess }: InterpretationCardProps
 
         <View style={styles.quotaOptions}>
           <Button
-            title="⭐ Upgrade to Pro"
+            title="Upgrade to Pro"
             onPress={() => router.push('/paywall')}
             variant="gold"
             fullWidth
@@ -94,7 +95,7 @@ export function InterpretationCard({ dream, onSuccess }: InterpretationCardProps
   if (error) {
     return (
       <View style={styles.errorCard}>
-        <Text style={styles.errorEmoji}>⚠️</Text>
+        <Ionicons name="warning-outline" size={32} color="#f87171" />
         <Text style={styles.errorTitle}>Something went wrong</Text>
         <Text style={styles.errorText}>{error}</Text>
         <Button title="Try Again" onPress={handleInterpret} variant="secondary" size="md" />
@@ -106,7 +107,7 @@ export function InterpretationCard({ dream, onSuccess }: InterpretationCardProps
   return (
     <View style={styles.ctaCard}>
       <View style={styles.ctaHeader}>
-        <Text style={styles.ctaEmoji}>🔮</Text>
+        <Ionicons name="sparkles" size={32} color="#a78bfa" />
         <View style={styles.ctaTexts}>
           <Text style={styles.ctaTitle}>AI Dream Interpretation</Text>
           <Text style={styles.ctaSub}>
@@ -139,7 +140,7 @@ export function InterpretationCard({ dream, onSuccess }: InterpretationCardProps
 
       {hasQuota ? (
         <Button
-          title={isPro ? '🤖 Interpret This Dream' : `🔮 Interpret (${remaining} left)`}
+          title={isPro ? 'Interpret This Dream' : `Interpret (${remaining} left)`}
           onPress={handleInterpret}
           isLoading={isLoading}
           fullWidth
@@ -148,14 +149,14 @@ export function InterpretationCard({ dream, onSuccess }: InterpretationCardProps
       ) : (
         <View style={styles.noQuotaActions}>
           <Button
-            title="⭐ Get Unlimited with Pro"
+            title="Get Unlimited with Pro"
             onPress={() => router.push('/paywall')}
             variant="gold"
             fullWidth
             size="lg"
           />
           <TouchableOpacity style={styles.rewardedBtn}>
-            <Text style={styles.rewardedText}>📺 Watch ad for 1 free interpretation</Text>
+            <Text style={styles.rewardedText}>Watch ad for 1 free interpretation</Text>
           </TouchableOpacity>
         </View>
       )}

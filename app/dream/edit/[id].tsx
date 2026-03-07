@@ -122,7 +122,7 @@ export default function EditDreamScreen() {
           {[
             { key: 'lucid', label: '✨ Lucid Dream', value: isLucid, onChange: setIsLucid },
             { key: 'recurring', label: '🔄 Recurring', value: isRecurring, onChange: setIsRecurring },
-            { key: 'public', label: '🌐 Share Anonymously', value: isPublic, onChange: setIsPublic },
+            { key: 'public', label: 'Share Anonymously', value: isPublic, onChange: setIsPublic },
           ].map(({ key, label, value, onChange }) => (
             <View key={key} style={styles.toggleRow}>
               <Text style={styles.toggleLabel}>{label}</Text>

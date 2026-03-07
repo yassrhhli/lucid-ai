@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
@@ -11,12 +12,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
 
 const FEATURES = [
-  { emoji: '🤖', label: 'Unlimited AI dream interpretations' },
-  { emoji: '📊', label: 'Pattern analysis & monthly reports' },
-  { emoji: '🎯', label: '30-day Lucid Dreaming program' },
-  { emoji: '🚫', label: 'Completely ad-free experience' },
-  { emoji: '🔮', label: 'Full dream symbol dictionary (10K+)' },
-  { emoji: '💬', label: 'Priority customer support' },
+  { icon: 'infinite-outline', label: 'Unlimited AI dream interpretations' },
+  { icon: 'bar-chart-outline', label: 'Pattern analysis & monthly reports' },
+  { icon: 'moon-outline', label: '30-day Lucid Dreaming program' },
+  { icon: 'ban-outline', label: 'Completely ad-free experience' },
+  { icon: 'book-outline', label: 'Full dream symbol dictionary (10K+)' },
+  { icon: 'headset-outline', label: 'Priority customer support' },
 ];
 
 type PlanKey = 'annual' | 'monthly' | 'lifetime';
@@ -79,15 +80,15 @@ export default function PaywallScreen() {
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <LinearGradient colors={['#1a0a3a', '#2d1060', '#1a0a3a']} style={styles.hero}>
-          <Text style={styles.heroEmoji}>⭐</Text>
+          <Ionicons name='star' size={64} color='#FFD700' />
           <Text style={styles.heroTitle}>LUCID PRO</Text>
           <Text style={styles.heroSub}>Unlock the full power of your dream world</Text>
         </LinearGradient>
 
         <View style={styles.featuresCard}>
-          {FEATURES.map(({ emoji, label }) => (
+          {FEATURES.map(({ icon, label }) => (
             <View key={label} style={styles.featureRow}>
-              <Text style={styles.featureEmoji}>{emoji}</Text>
+              <Ionicons name={icon as any} size={22} color='#FFD700' style={{ width: 28 }} />
               <Text style={styles.featureLabel}>{label}</Text>
               <Text style={styles.checkmark}>✓</Text>
             </View>
@@ -145,7 +146,7 @@ export default function PaywallScreen() {
         </Text>
 
         <View style={styles.trustRow}>
-          {['🔒 Secure', '✅ No Ads', '💜 Cancel Anytime'].map(t => (
+          {['Secure', 'No Ads', 'Cancel Anytime'].map(t => (
             <Text key={t} style={styles.trustItem}>{t}</Text>
           ))}
         </View>

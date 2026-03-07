@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
   View,
@@ -9,17 +10,17 @@ import {
 import type { Emotion } from '@/types/dream';
 import { COLORS, FONT_SIZES, RADIUS, SPACING } from '@/constants/theme';
 
-const EMOTIONS: { key: Emotion; label: string; emoji: string }[] = [
-  { key: 'joy',       label: 'Joy',       emoji: '😄' },
-  { key: 'fear',      label: 'Fear',      emoji: '😨' },
-  { key: 'anxiety',   label: 'Anxiety',   emoji: '😰' },
-  { key: 'peace',     label: 'Peace',     emoji: '😌' },
-  { key: 'sadness',   label: 'Sadness',   emoji: '😢' },
-  { key: 'excitement',label: 'Excited',   emoji: '🤩' },
-  { key: 'confusion', label: 'Confused',  emoji: '😵' },
-  { key: 'anger',     label: 'Anger',     emoji: '😡' },
-  { key: 'love',      label: 'Love',      emoji: '🥰' },
-  { key: 'wonder',    label: 'Wonder',    emoji: '🌟' },
+const EMOTIONS: { key: Emotion; label: string; icon: string; color: string }[] = [
+  { key: 'joy',        label: 'Joy',      icon: 'sunny',        color: '#fbbf24' },
+  { key: 'fear',       label: 'Fear',     icon: 'flash',        color: '#6366f1' },
+  { key: 'anxiety',    label: 'Anxiety',  icon: 'alert-circle', color: '#f97316' },
+  { key: 'peace',      label: 'Peace',    icon: 'leaf',         color: '#34d399' },
+  { key: 'sadness',    label: 'Sadness',  icon: 'rainy',        color: '#60a5fa' },
+  { key: 'excitement', label: 'Excited',  icon: 'star',         color: '#f472b6' },
+  { key: 'confusion',  label: 'Confused', icon: 'help-circle',  color: '#a78bfa' },
+  { key: 'anger',      label: 'Anger',    icon: 'flame',        color: '#ef4444' },
+  { key: 'love',       label: 'Love',     icon: 'heart',        color: '#f472b6' },
+  { key: 'wonder',     label: 'Wonder',   icon: 'sparkles',     color: '#818cf8' },
 ];
 
 interface EmotionPickerProps {
@@ -44,9 +45,8 @@ export function EmotionPicker({ selected, onChange, max = 3 }: EmotionPickerProp
         <Text style={styles.counter}>{selected.length}/{max}</Text>
       </View>
       <View style={styles.grid}>
-        {EMOTIONS.map(({ key, label, emoji }) => {
+        {EMOTIONS.map(({ key, label, icon, color }) => {
           const isSelected = selected.includes(key);
-          const color = COLORS.emotions[key];
           return (
             <TouchableOpacity
               key={key}
@@ -57,7 +57,7 @@ export function EmotionPicker({ selected, onChange, max = 3 }: EmotionPickerProp
                 isSelected && { backgroundColor: color + '22', borderColor: color },
               ]}
             >
-              <Text style={styles.emoji}>{emoji}</Text>
+              <Ionicons name={icon as any} size={14} color={isSelected ? '#fff' : color} />
               <Text
                 style={[
                   styles.chipLabel,

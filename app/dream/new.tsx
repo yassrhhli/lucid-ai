@@ -12,6 +12,7 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { format } from 'date-fns';
@@ -128,7 +129,7 @@ export default function NewDreamScreen() {
         >
           {/* Date */}
           <View style={styles.dateRow}>
-            <Text style={styles.dateEmoji}>🌙</Text>
+            <Ionicons name='moon-outline' size={18} color='#a78bfa' />
             <Text style={styles.dateText}>
               {format(new Date(dreamDate + 'T12:00:00'), 'EEEE, MMMM d, yyyy')}
             </Text>
@@ -255,21 +256,21 @@ export default function NewDreamScreen() {
             {[
               {
                 key: 'lucid',
-                label: '✨ Lucid Dream',
+                label: 'Lucid Dream',
                 sub: 'You were aware you were dreaming',
                 value: isLucid,
                 onChange: setIsLucid,
               },
               {
                 key: 'recurring',
-                label: '🔄 Recurring Dream',
+                label: 'Recurring Dream',
                 sub: "You've had this dream before",
                 value: isRecurring,
                 onChange: setIsRecurring,
               },
               {
                 key: 'public',
-                label: '🌐 Share Anonymously',
+                label: 'Share Anonymously',
                 sub: 'Post to the Dream Feed (anonymous)',
                 value: isPublic,
                 onChange: setIsPublic,

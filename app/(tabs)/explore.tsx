@@ -1,3 +1,5 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, RefreshControl,
@@ -14,6 +16,7 @@ import type { FeedPost } from '@/types/dream';
 
 export default function ExploreScreen() {
   const { user, isPro } = useAuth();
+  const router = useRouter();
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -63,13 +66,17 @@ export default function ExploreScreen() {
 
   const renderItem = ({ item, index }: { item: FeedPost; index: number }) => {
     const hasVoted = votedIds.has(item.id);
-    const preview = (item.dream?.content ?? '').slice(0, 200).trim() + (item.dream?.content?.length ?? 0 > 200 ? '…' : '');
+    const preview = (item.dream?.content ?? '').slice(0, 200).trim() + ((item.dream?.content?.length ?? 0) > 200 ? '…' : '');
     const showAd = !isPro && index > 0 && index % 4 === 0;
 
     return (
       <>
         {showAd && <BannerAdComponent size="banner" style={{ marginVertical: SPACING.xs }} />}
-        <View style={styles.card}>
+        <TouchableOpacity
+          style={styles.card}
+          activeOpacity={0.8}
+          onPress={() => router.push(`/dream/${item.dream_id}`)}
+        >
           <View style={styles.cardHeader}>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>{(item.anonymous_name ?? 'A')[0].toUpperCase()}</Text>
@@ -79,7 +86,7 @@ export default function ExploreScreen() {
               <Text style={styles.date}>{format(new Date(item.created_at), 'MMM d · h:mm a')}</Text>
             </View>
             {item.dream?.is_lucid && (
-              <View style={styles.lucidBadge}><Text style={styles.lucidText}>✨ Lucid</Text></View>
+              <View style={styles.lucidBadge}><Ionicons name='moon' size={12} color='#a78bfa' /><Text style={styles.lucidText}> Lucid</Text></View>
             )}
           </View>
           {item.dream?.title && <Text style={styles.cardTitle}>{item.dream.title}</Text>}
@@ -92,12 +99,16 @@ export default function ExploreScreen() {
             </View>
           )}
           <View style={styles.cardFooter}>
-            <TouchableOpacity onPress={() => handleVote(item)} style={styles.voteBtn} activeOpacity={0.7}>
-              <Text style={styles.voteEmoji}>{hasVoted ? '💜' : '🤍'}</Text>
-              <Text style={[styles.voteCount, hasVoted && { color: COLORS.primary }]}>{item.vote_count}</Text>
+            <TouchableOpacity onPress={(e) => { e.stopPropagation(); handleVote(item); }} style={[styles.voteBtn, hasVoted && styles.voteBtnActive]} activeOpacity={0.7}>
+              <Ionicons name={hasVoted ? 'heart' : 'heart-outline'} size={16} color={hasVoted ? '#f472b6' : COLORS.textSecondary} />
+              <Text style={[styles.voteCount, hasVoted && styles.voteCountActive]}>{item.vote_count ?? 0}</Text>
             </TouchableOpacity>
+            <View style={styles.cardFooterRight}>
+              <Ionicons name="eye-outline" size={14} color={COLORS.textSecondary} />
+              <Text style={styles.readMore}>Read dream</Text>
+            </View>
           </View>
-        </View>
+        </TouchableOpacity>
       </>
     );
   };
@@ -118,7 +129,7 @@ export default function ExploreScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Text style={{ fontSize: 64 }}>🌐</Text>
+              <Ionicons name="globe-outline" size={64} color="#6b5fa6" />
               <Text style={styles.emptyTitle}>No dreams yet</Text>
               <Text style={styles.emptySub}>Be the first to share a dream anonymously!</Text>
             </View>
@@ -142,7 +153,6 @@ const styles = StyleSheet.create({
   avatarText: { fontSize: FONT_SIZES.sm, fontWeight: '700', color: COLORS.primary },
   name: { fontSize: FONT_SIZES.sm, fontWeight: '600', color: COLORS.text },
   date: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted },
-  lucidBadge: { backgroundColor: COLORS.primary + '22', borderRadius: RADIUS.full, paddingHorizontal: SPACING.sm, paddingVertical: 2, borderWidth: 1, borderColor: COLORS.primary + '44' },
   lucidText: { fontSize: 10, color: COLORS.primary, fontWeight: '600' },
   cardTitle: { fontSize: FONT_SIZES.md, fontWeight: '700', color: COLORS.text },
   cardContent: { fontSize: FONT_SIZES.sm, color: COLORS.textSecondary, lineHeight: 20 },
@@ -150,9 +160,13 @@ const styles = StyleSheet.create({
   tag: { backgroundColor: COLORS.surfaceElevated, borderRadius: RADIUS.full, paddingHorizontal: SPACING.sm, paddingVertical: 2 },
   tagText: { fontSize: 10, color: COLORS.textMuted },
   cardFooter: { flexDirection: 'row', alignItems: 'center' },
-  voteBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  voteEmoji: { fontSize: 18 },
+  voteBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 6, paddingHorizontal: 10, borderRadius: RADIUS.full, backgroundColor: COLORS.background, borderWidth: 1, borderColor: COLORS.border },
+  voteBtnActive: { backgroundColor: '#f472b622', borderColor: '#f472b644' },
   voteCount: { fontSize: FONT_SIZES.sm, fontWeight: '600', color: COLORS.textMuted },
+  voteCountActive: { color: '#f472b6' },
+  cardFooterRight: { flexDirection: 'row', alignItems: 'center', gap: 4, marginLeft: 'auto' },
+  readMore: { fontSize: FONT_SIZES.xs, color: COLORS.textSecondary },
+  lucidBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.primary + '22', borderRadius: RADIUS.full, paddingHorizontal: SPACING.sm, paddingVertical: 2, borderWidth: 1, borderColor: COLORS.primary + '44' },
   empty: { alignItems: 'center', paddingTop: 80, gap: SPACING.sm },
   emptyTitle: { fontSize: FONT_SIZES.xl, fontWeight: '700', color: COLORS.text },
   emptySub: { fontSize: FONT_SIZES.sm, color: COLORS.textMuted, textAlign: 'center' },

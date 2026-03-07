@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,10 +10,17 @@ import { Button } from '@/components/ui/Button';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
 import type { Dream, Emotion } from '@/types/dream';
 
-const EMOTION_EMOJI: Record<string, string> = {
-  joy: '😄', fear: '😨', anxiety: '😰', peace: '😌',
-  sadness: '😢', excitement: '🤩', confusion: '😵',
-  anger: '😡', love: '🥰', wonder: '🌟',
+const EMOTION_ICON: Record<string, { name: string; color: string }> = {
+  joy:        { name: 'sunny',        color: '#fbbf24' },
+  fear:       { name: 'flash',        color: '#6366f1' },
+  anxiety:    { name: 'alert-circle', color: '#f97316' },
+  peace:      { name: 'leaf',         color: '#34d399' },
+  sadness:    { name: 'rainy',        color: '#60a5fa' },
+  excitement: { name: 'star',         color: '#f472b6' },
+  confusion:  { name: 'help-circle',  color: '#a78bfa' },
+  anger:      { name: 'flame',        color: '#ef4444' },
+  love:       { name: 'heart',        color: '#f472b6' },
+  wonder:     { name: 'sparkles',     color: '#818cf8' },
 };
 
 function computeStats(dreams: Dream[]) {
@@ -72,20 +80,21 @@ export default function PatternsScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.gateContainer}>
-          <Text style={styles.gateEmoji}>📊</Text>
+          <Ionicons name='analytics-outline' size={72} color='#6b5fa6' />
           <Text style={styles.gateTitle}>Dream Patterns</Text>
           <Text style={styles.gateSub}>
             Discover recurring symbols, emotions, and themes across all your dreams. Understand yourself at a deeper level.
           </Text>
           <View style={styles.previewCards}>
-            {['Top Emotions', 'Recurring Themes', 'Archetype Profile', 'Sleep Quality Trend'].map(label => (
+            {[{ label: 'Top Emotions', icon: 'heart' }, { label: 'Recurring Themes', icon: 'repeat' }, { label: 'Archetype Profile', icon: 'person' }, { label: 'Sleep Quality Trend', icon: 'bed' }].map(({ label, icon }) => (
               <View key={label} style={styles.previewCard}>
                 <View style={styles.previewBlur} />
+                <Text style={styles.previewCardIcon}>{icon}</Text>
                 <Text style={styles.previewLabel}>{label}</Text>
               </View>
             ))}
           </View>
-          <Button title="⭐ Unlock with Pro" onPress={() => router.push('/paywall')} variant="gold" fullWidth size="lg" style={{ marginTop: SPACING.md }} />
+          <Button title="Unlock with Pro" onPress={() => router.push('/paywall')} variant="gold" fullWidth size="lg" style={{ marginTop: SPACING.md }} />
           <Text style={styles.gateHint}>Available with Lucid Pro · From $2.92/month</Text>
         </View>
       </SafeAreaView>
@@ -96,7 +105,7 @@ export default function PatternsScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.emptyContainer}>
-          <Text style={{ fontSize: 64 }}>📊</Text>
+          <Ionicons name='analytics-outline' size={64} color='#6b5fa6' />
           <Text style={styles.gateTitle}>Not Enough Data Yet</Text>
           <Text style={styles.gateSub}>Record at least 3 dreams to see your patterns.</Text>
           <Text style={styles.gateHint}>You have {dreams.length} dream{dreams.length !== 1 ? 's' : ''} so far.</Text>
@@ -116,14 +125,14 @@ export default function PatternsScreen() {
         {/* Stats row */}
         <View style={styles.statsRow}>
           {[
-            { label: 'Total Dreams', value: String(dreams.length), emoji: '🌙' },
-            { label: 'Lucid', value: `${stats.lucidPct}%`, emoji: '✨' },
-            { label: 'Interpreted', value: String(stats.interpretedCount), emoji: '🤖' },
-            { label: 'Avg Sleep', value: stats.avgQuality ? `${stats.avgQuality.toFixed(1)}/5` : '—', emoji: '😴' },
+            { label: 'Total Dreams', value: String(dreams.length), icon: 'sparkles-outline', color: '#a78bfa' },
+            { label: 'Lucid', value: `${stats.lucidPct}%`, icon: 'moon-outline', color: '#818cf8' },
+            { label: 'Interpreted', value: String(stats.interpretedCount), icon: 'hardware-chip-outline', color: '#34d399' },
+            { label: 'Avg Sleep', value: stats.avgQuality ? `${stats.avgQuality.toFixed(1)}/5` : '—', icon: 'bed-outline', color: '#60a5fa' },
           ].map(s => (
             <View key={s.label} style={styles.statCard}>
-              <Text style={styles.statEmoji}>{s.emoji}</Text>
-              <Text style={styles.statValue}>{s.value}</Text>
+              <Ionicons name={s.icon as any} size={18} color={s.color} />
+              <Text style={[styles.statValue, { color: s.color }]}>{s.value}</Text>
               <Text style={styles.statLabel}>{s.label}</Text>
             </View>
           ))}
@@ -132,13 +141,13 @@ export default function PatternsScreen() {
         {/* Top Emotions */}
         {stats.topEmotions.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>💜 Dominant Emotions</Text>
+            <Text style={styles.sectionTitle}>♦ Dominant Emotions</Text>
             <View style={styles.emotionBars}>
               {stats.topEmotions.map(([emotion, count]) => {
                 const pct = Math.round((count / dreams.length) * 100);
                 return (
                   <View key={emotion} style={styles.emotionRow}>
-                    <Text style={styles.emotionEmoji}>{EMOTION_EMOJI[emotion] ?? '💭'}</Text>
+                    <Ionicons name={(EMOTION_ICON[emotion]?.name ?? 'ellipse') as any} size={16} color={EMOTION_ICON[emotion]?.color ?? '#6b7280'} style={{ width: 22 }} />
                     <Text style={styles.emotionLabel}>{emotion}</Text>
                     <View style={styles.barTrack}>
                       <View style={[styles.barFill, { width: `${pct}%`, backgroundColor: COLORS.emotions[emotion as Emotion] ?? COLORS.primary }]} />
@@ -154,7 +163,7 @@ export default function PatternsScreen() {
         {/* Top Tags */}
         {stats.topTags.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🏷️ Recurring Themes</Text>
+            <Text style={styles.sectionTitle}>Recurring Themes</Text>
             <View style={styles.tagCloud}>
               {stats.topTags.map(([tag, count]) => (
                 <View key={tag} style={styles.tagChip}>
@@ -169,7 +178,7 @@ export default function PatternsScreen() {
         {/* Archetypes */}
         {stats.topArchetypes.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>⚡ Your Archetypes</Text>
+            <Text style={styles.sectionTitle}>Your Archetypes</Text>
             <View style={styles.archetypeGrid}>
               {stats.topArchetypes.map(([arch, count]) => (
                 <LinearGradient key={arch} colors={[COLORS.primary + '22', COLORS.primary + '11']} style={styles.archetypeCard}>
@@ -225,5 +234,6 @@ const styles = StyleSheet.create({
   previewCards: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm, width: '100%', marginTop: SPACING.sm },
   previewCard: { flex: 1, minWidth: '45%', height: 70, backgroundColor: COLORS.surface, borderRadius: RADIUS.lg, borderWidth: 1, borderColor: COLORS.border, justifyContent: 'flex-end', padding: SPACING.sm, overflow: 'hidden' },
   previewBlur: { ...StyleSheet.absoluteFillObject, backgroundColor: COLORS.surface, opacity: 0.9 },
+  previewCardIcon: { fontSize: 22, color: '#9b8ec4', marginBottom: 4 },
   previewLabel: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, fontWeight: '600', zIndex: 1 },
 });

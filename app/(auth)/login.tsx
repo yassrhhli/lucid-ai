@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { useRef } from 'react';
 import {
   View,
@@ -68,7 +69,7 @@ export default function LoginScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.logo}>🌙</Text>
+          <Ionicons name='moon' size={48} color='#a78bfa' />
           <Text style={styles.appName}>LUCID.AI</Text>
           <Text style={styles.tagline}>Your dreams, decoded.</Text>
         </View>

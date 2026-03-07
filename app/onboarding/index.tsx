@@ -7,9 +7,11 @@ import {
   FlatList,
   Dimensions,
   Alert,
+  TextInput,
 } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
@@ -21,31 +23,36 @@ const { width } = Dimensions.get('window');
 
 const SLIDES = [
   {
-    emoji: '🌙',
+    icon: 'moon' as const,
+    iconColor: '#a78bfa',
     title: 'Welcome to\nLucid AI',
     subtitle: 'Your personal AI dream analyst. Decode the hidden language of your subconscious mind.',
     bg: ['#0a0a0f', '#12092a'] as [string, string],
   },
   {
-    emoji: '✍️',
+    icon: 'pencil' as const,
+    iconColor: '#60a5fa',
     title: 'Record Your\nDreams',
-    subtitle: 'Log dreams each morning before they fade. Voice recording or text — whatever feels natural.',
+    subtitle: 'Log dreams each morning before they fade. Just a few sentences is enough to unlock deep insights.',
     bg: ['#0a0a0f', '#0a1a2a'] as [string, string],
   },
   {
-    emoji: '🤖',
+    icon: 'sparkles' as const,
+    iconColor: '#f472b6',
     title: 'AI Interprets\nYour Dreams',
     subtitle: 'Our AI analyzes symbols, archetypes, and emotions using Jungian psychology and neuroscience.',
     bg: ['#0a0a0f', '#1a0a2a'] as [string, string],
   },
   {
-    emoji: '📊',
+    icon: 'bar-chart' as const,
+    iconColor: '#34d399',
     title: 'Discover\nYour Patterns',
     subtitle: 'Track recurring themes, symbols, and emotions to understand your deeper self over time.',
     bg: ['#0a0a0f', '#0a1a1a'] as [string, string],
   },
   {
-    emoji: '🔔',
+    icon: 'notifications' as const,
+    iconColor: '#fbbf24',
     title: 'Never Forget\nA Dream',
     subtitle: "We'll send you a gentle reminder each morning to capture your dreams while they're fresh.",
     bg: ['#0a0a0f', '#1a0f0a'] as [string, string],
@@ -56,6 +63,7 @@ const SLIDES = [
 export default function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [username, setUsername] = useState('');
   const flatListRef = useRef<FlatList>(null);
   const { updateProfile } = useAuth();
 
@@ -81,7 +89,7 @@ export default function OnboardingScreen() {
       }
 
       // Marquer l'onboarding comme complété
-      await updateProfile({ onboarding_completed: true });
+      await updateProfile({ onboarding_completed: true, username: username.trim() || null });
 
       analytics.track(EVENTS.ONBOARDING_COMPLETED, {
         notifications_granted: granted,
@@ -109,18 +117,32 @@ export default function OnboardingScreen() {
       style={styles.slide}
     >
       <View style={styles.slideContent}>
-        <Text style={styles.slideEmoji}>{item.emoji}</Text>
+        <Ionicons name={item.icon as any} size={96} color={item.iconColor} />
         <Text style={styles.slideTitle}>{item.title}</Text>
         <Text style={styles.slideSubtitle}>{item.subtitle}</Text>
 
         {item.isFinal && (
+          <>
           <View style={styles.notifCard}>
-            <Text style={styles.notifEmoji}>⏰</Text>
+            <Ionicons name='alarm-outline' size={32} color='#fbbf24' />
             <View>
               <Text style={styles.notifTitle}>Morning Dream Reminder</Text>
               <Text style={styles.notifSub}>Every day at 8:00 AM — customizable</Text>
             </View>
           </View>
+          <View style={styles.nameWrap}>
+            <Text style={styles.nameLabel}>What should we call you?</Text>
+            <TextInput
+              style={styles.nameField}
+              placeholder="Your first name..."
+              placeholderTextColor='#555'
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize='words'
+              returnKeyType='done'
+            />
+          </View>
+          </>
         )}
       </View>
     </LinearGradient>
@@ -169,7 +191,7 @@ export default function OnboardingScreen() {
       {/* CTA */}
       <View style={styles.footer}>
         <Button
-          title={isLast ? '🔔 Enable Reminders & Start' : 'Continue'}
+          title={isLast ? 'Enable Reminders & Start' : 'Continue'}
           onPress={goNext}
           isLoading={isLoading}
           fullWidth
@@ -252,4 +274,7 @@ const styles = StyleSheet.create({
   },
   noThanksBtn: { alignItems: 'center', padding: SPACING.sm },
   noThanksText: { color: COLORS.textMuted, fontSize: FONT_SIZES.sm },
+  nameWrap: { width: '100%', gap: SPACING.xs, marginTop: SPACING.md },
+  nameLabel: { color: COLORS.textMuted, fontSize: FONT_SIZES.sm, textAlign: 'center' },
+  nameField: { backgroundColor: COLORS.surface, borderRadius: RADIUS.lg, padding: SPACING.md, color: COLORS.text, fontSize: FONT_SIZES.md, borderWidth: 1, borderColor: COLORS.border, textAlign: 'center' },
 });

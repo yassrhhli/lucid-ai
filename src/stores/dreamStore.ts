@@ -72,6 +72,8 @@ export const useDreamStore = create<DreamState>((set, get) => ({
       const newDream = normalizeDream(data);
       set((state) => ({ dreams: [newDream, ...state.dreams] }));
       await supabase.rpc('update_streak', { p_user_id: userId });
+      await supabase.from('profiles').update({ last_dream_at: new Date().toISOString() }).eq('id', userId);
+      await supabase.from('profiles').update({ last_dream_at: new Date().toISOString() }).eq('id', userId);
       return newDream;
     } catch (error: any) {
       console.error('[DreamStore] createDream:', error);

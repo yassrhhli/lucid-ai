@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
   View,
@@ -44,19 +45,30 @@ export default function ProfileScreen() {
 
         {/* Avatar + info */}
         <View style={styles.profileCard}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {(profile?.username ?? user?.email ?? 'D')[0].toUpperCase()}
-            </Text>
+          <View style={styles.avatarWrap}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>
+                {(profile?.username ?? user?.email ?? 'D')[0].toUpperCase()}
+              </Text>
+            </View>
+            <TouchableOpacity style={styles.editAvatarBtn} onPress={() => router.push('/edit-profile')}>
+              <Ionicons name="pencil" size={14} color="#fff" />
+            </TouchableOpacity>
           </View>
-          <View>
-            <Text style={styles.username}>
-              {profile?.username ?? user?.email?.split('@')[0] ?? 'Dreamer'}
-            </Text>
+          <View style={styles.userInfo}>
+            <View style={styles.nameRow}>
+              <Text style={styles.username}>
+                {(() => { const raw = profile?.username ?? user?.email?.split('@')[0] ?? 'Dreamer'; return raw.split('.')[0].charAt(0).toUpperCase() + raw.split('.')[0].slice(1); })()}
+              </Text>
+              <TouchableOpacity style={styles.editBtn} onPress={() => router.push('/edit-profile')}>
+                <Ionicons name="create-outline" size={16} color={COLORS.primary} />
+                <Text style={styles.editBtnText}>Edit</Text>
+              </TouchableOpacity>
+            </View>
             <Text style={styles.email}>{user?.email}</Text>
             {isPro && (
               <View style={styles.proBadge}>
-                <Text style={styles.proBadgeText}>⭐ LUCID PRO</Text>
+                <Text style={styles.proBadgeText}>★ LUCID PRO</Text>
               </View>
             )}
           </View>
@@ -65,14 +77,14 @@ export default function ProfileScreen() {
         {/* Stats */}
         <View style={styles.statsGrid}>
           {[
-            { label: 'Total Dreams', value: dreams.length, emoji: '🌙' },
-            { label: 'Day Streak', value: profile?.streak_days ?? 0, emoji: '🔥' },
-            { label: 'Lucid Dreams', value: lucidCount, emoji: '✨' },
-            { label: 'AI Interpreted', value: interpretedCount, emoji: '🤖' },
-          ].map(({ label, value, emoji }) => (
+            { label: 'Total Dreams', value: dreams.length, icon: 'sparkles-outline', color: '#a78bfa' },
+            { label: 'Day Streak', value: profile?.streak_days ?? 0, icon: 'flame-outline', color: '#f97316' },
+            { label: 'Lucid Dreams', value: lucidCount, icon: 'moon-outline', color: '#818cf8' },
+            { label: 'AI Interpreted', value: interpretedCount, icon: 'hardware-chip-outline', color: '#34d399' },
+          ].map(({ label, value, icon, color }) => (
             <View key={label} style={styles.statCard}>
-              <Text style={styles.statEmoji}>{emoji}</Text>
-              <Text style={styles.statValue}>{value}</Text>
+              <Ionicons name={icon as any} size={20} color={color} />
+              <Text style={[styles.statValue, { color }]}>{value}</Text>
               <Text style={styles.statLabel}>{label}</Text>
             </View>
           ))}
@@ -85,7 +97,7 @@ export default function ProfileScreen() {
             style={styles.upgradeCard}
             activeOpacity={0.9}
           >
-            <Text style={styles.upgradeEmoji}>⭐</Text>
+            <Ionicons name="star" size={20} color="#fbbf24" />
             <View style={styles.upgradeText}>
               <Text style={styles.upgradeTitle}>Upgrade to Pro</Text>
               <Text style={styles.upgradeSub}>Unlimited AI · No ads · Pattern insights</Text>
@@ -97,18 +109,18 @@ export default function ProfileScreen() {
         {/* Menu */}
         <View style={styles.menu}>
           {[
-            { emoji: '🔔', label: 'Notifications', onPress: () => {} },
-            { emoji: '🔒', label: 'Privacy & Data', onPress: () => {} },
-            { emoji: '⭐', label: 'Rate Lucid AI', onPress: () => {} },
-            { emoji: '💬', label: 'Contact Support', onPress: () => {} },
-          ].map(({ emoji, label, onPress }) => (
+            { icon: 'notifications-outline', label: 'Notifications', onPress: () => router.push('/notifications') },
+            { icon: 'shield-outline', label: 'Privacy & Data', onPress: () => router.push('/privacy') },
+            { icon: 'star-outline', label: 'Rate Lucid AI', onPress: () => { const { Linking } = require('react-native'); Linking.openURL('https://apps.apple.com/app/idYOUR_APP_ID?action=write-review'); } },
+            { icon: 'mail-outline', label: 'Contact Support', onPress: () => { const { Linking } = require('react-native'); Linking.openURL('mailto:support@lucidai.app'); } },
+          ].map(({ icon, label, onPress }) => (
             <TouchableOpacity
               key={label}
               onPress={onPress}
               style={styles.menuItem}
               activeOpacity={0.7}
             >
-              <Text style={styles.menuEmoji}>{emoji}</Text>
+              <Ionicons name={icon as any} size={18} color={COLORS.textSecondary} />
               <Text style={styles.menuLabel}>{label}</Text>
               <Text style={styles.menuArrow}>›</Text>
             </TouchableOpacity>
@@ -148,6 +160,12 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     marginBottom: SPACING.lg,
   },
+  avatarWrap: { position: 'relative' },
+  editAvatarBtn: { position: 'absolute', bottom: 0, right: 0, width: 26, height: 26, borderRadius: 13, backgroundColor: COLORS.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: COLORS.background },
+  userInfo: { flex: 1 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
+  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: COLORS.primary + '22', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4, borderWidth: 1, borderColor: COLORS.primary + '44' },
+  editBtnText: { fontSize: FONT_SIZES.xs, color: COLORS.primary, fontWeight: '600' },
   avatar: {
     width: 60, height: 60,
     borderRadius: 30,

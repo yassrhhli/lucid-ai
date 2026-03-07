@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { useRef, useState } from 'react';
 import {
   View,
@@ -178,9 +179,9 @@ export default function RegisterScreen() {
           {/* Benefits */}
           <View style={styles.benefits}>
             {[
-              '🌙 AI-powered dream interpretations',
-              '📊 Track patterns & recurring themes',
-              '🔮 Daily dream insights & affirmations',
+              'AI-powered dream interpretations',
+              'Track patterns & recurring themes',
+              'Daily dream insights & affirmations',
               '💜 3 free interpretations per week',
             ].map((benefit) => (
               <Text key={benefit} style={styles.benefitItem}>

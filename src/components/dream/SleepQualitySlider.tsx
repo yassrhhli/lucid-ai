@@ -1,14 +1,15 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import type { SleepQuality } from '@/types/dream';
 import { COLORS, FONT_SIZES, RADIUS, SPACING } from '@/constants/theme';
 
-const QUALITY_CONFIG: Record<SleepQuality, { label: string; emoji: string; color: string }> = {
-  1: { label: 'Terrible',  emoji: '😩', color: '#ef4444' },
-  2: { label: 'Poor',      emoji: '😞', color: '#f97316' },
-  3: { label: 'Ok',        emoji: '😐', color: '#eab308' },
-  4: { label: 'Good',      emoji: '😊', color: '#22c55e' },
-  5: { label: 'Amazing',   emoji: '🤩', color: '#8b5cf6' },
+const QUALITY_CONFIG: Record<SleepQuality, { label: string; icon: string; color: string }> = {
+  1: { label: 'Terrible', icon: 'sad-outline',         color: '#ef4444' },
+  2: { label: 'Poor',     icon: 'thumbs-down-outline', color: '#f97316' },
+  3: { label: 'Ok',       icon: 'remove-circle-outline', color: '#eab308' },
+  4: { label: 'Good',     icon: 'sunny-outline',       color: '#22c55e' },
+  5: { label: 'Amazing',  icon: 'star-outline',        color: '#8b5cf6' },
 };
 
 interface SleepQualitySliderProps {
@@ -25,7 +26,7 @@ export function SleepQualitySlider({ value, onChange }: SleepQualitySliderProps)
         <Text style={styles.label}>Sleep Quality</Text>
         {selected && (
           <Text style={[styles.selectedLabel, { color: selected.color }]}>
-            {selected.emoji} {selected.label}
+            {selected.label}
           </Text>
         )}
       </View>
@@ -46,7 +47,7 @@ export function SleepQualitySlider({ value, onChange }: SleepQualitySliderProps)
                 },
               ]}
             >
-              <Text style={styles.emoji}>{config.emoji}</Text>
+              <Ionicons name={config.icon as any} size={20} color={isSelected ? '#fff' : config.color} />
               <Text
                 style={[
                   styles.num,

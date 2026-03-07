@@ -1,31 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Share } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { format } from 'date-fns';
 import { useDreams } from '@/hooks/useDreams';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { InterpretationCard } from '@/components/dream/InterpretationCard';
+import { supabase } from '@/services/supabase';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
+import type { Dream } from '@/types/dream';
 
 const QUALITY_LABEL: Record<number, string> = {
-  1: '😩 Terrible', 2: '😞 Poor', 3: '😐 Ok', 4: '😊 Good', 5: '🤩 Amazing',
-};
-const EMOTION_EMOJI: Record<string, string> = {
-  joy: '😄', fear: '😨', anxiety: '😰', peace: '😌',
-  sadness: '😢', excitement: '🤩', confusion: '😵',
-  anger: '😡', love: '🥰', wonder: '🌟',
+  1: 'Terrible', 2: 'Poor', 3: 'Ok', 4: 'Good', 5: 'Amazing',
 };
 
 export default function DreamDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getDreamById, deleteDream } = useDreams();
   const [isDeleting, setIsDeleting] = useState(false);
-  const dream = getDreamById(id);
+  const [remoteDream, setRemoteDream] = useState<Dream | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
+
+  const localDream = getDreamById(id);
+  const dream = localDream ?? remoteDream;
+
+  useEffect(() => {
+    if (!localDream && id) {
+      setIsFetching(true);
+      supabase
+        .from('dreams')
+        .select('*, interpretation:interpretations(*)')
+        .eq('id', id)
+        .single()
+        .then(({ data }) => {
+          if (data) setRemoteDream(data as Dream);
+          setIsFetching(false);
+        });
+    }
+  }, [id, localDream]);
 
   if (!dream) return <LoadingSpinner fullScreen label="Loading dream..." />;
 
   const interpretation = dream.interpretation;
+  const isOwnDream = !!localDream;
 
   const handleDelete = () => {
     Alert.alert('Delete Dream', 'This will permanently delete this dream.', [
@@ -44,28 +63,30 @@ export default function DreamDetailScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backText}>‹ Back</Text>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={22} color={COLORS.primary} />
         </TouchableOpacity>
         <View style={styles.headerActions}>
-          <TouchableOpacity onPress={() => Share.share({ message: dream.content.slice(0, 280) + '...\n\n— LUCID.AI 🌙' })}>
-            <Text style={styles.actionText}>Share</Text>
+          <TouchableOpacity onPress={() => Share.share({ message: dream.content.slice(0, 280) + '...\n\n— LUCID.AI' })} style={styles.headerBtn}>
+            <Ionicons name="share-outline" size={20} color={COLORS.primary} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push(`/dream/edit/${dream.id}`)}>
-            <Text style={styles.actionText}>Edit</Text>
-          </TouchableOpacity>
+          {isOwnDream && (
+            <TouchableOpacity onPress={() => router.push(`/dream/edit/${dream.id}`)} style={styles.headerBtn}>
+              <Ionicons name="create-outline" size={20} color={COLORS.primary} />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <Text style={styles.date}>🌙 {format(new Date(dream.dream_date + 'T12:00:00'), 'EEEE, MMMM d, yyyy')}</Text>
-
-        <View style={styles.badges}>
-          {dream.is_lucid && <View style={styles.badge}><Text style={styles.badgeText}>✨ Lucid</Text></View>}
-          {dream.is_recurring && <View style={[styles.badge, styles.badgeGold]}><Text style={styles.badgeText}>🔄 Recurring</Text></View>}
-        </View>
-
-        {dream.title && <Text style={styles.title}>{dream.title}</Text>}
+        <LinearGradient colors={['#6b5fa622', 'transparent']} style={styles.heroGradient}>
+          <Text style={styles.date}>{format(new Date(dream.dream_date + 'T12:00:00'), 'EEEE, MMMM d, yyyy')}</Text>
+          {dream.title && <Text style={styles.title}>{dream.title}</Text>}
+          <View style={styles.badges}>
+            {dream.is_lucid && <View style={styles.badge}><Ionicons name="moon" size={11} color="#a78bfa" /><Text style={styles.badgeText}> Lucid</Text></View>}
+            {dream.is_recurring && <View style={[styles.badge, styles.badgeGold]}><Ionicons name="refresh" size={11} color="#fbbf24" /><Text style={styles.badgeText}> Recurring</Text></View>}
+          </View>
+        </LinearGradient>
 
         <View style={styles.contentCard}>
           <Text style={styles.content}>{dream.content}</Text>
@@ -81,7 +102,7 @@ export default function DreamDetailScreen() {
           {dream.emotions.length > 0 && (
             <View style={styles.detailPill}>
               <Text style={styles.detailLabel}>Emotions</Text>
-              <Text style={styles.detailValue}>{dream.emotions.map(e => EMOTION_EMOJI[e]).join(' ')}</Text>
+              <Text style={styles.detailValue}>{dream.emotions.map(e => e.charAt(0).toUpperCase() + e.slice(1)).join(', ')}</Text>
             </View>
           )}
         </View>
@@ -96,17 +117,19 @@ export default function DreamDetailScreen() {
 
         <View style={styles.divider} />
 
-        {/* INTERPRÉTATION IA */}
         {interpretation ? (
           <View style={styles.interpretationSection}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>🤖 AI Interpretation</Text>
+              <Text style={styles.sectionTitle}>AI Interpretation</Text>
               <Text style={styles.sectionMeta}>{interpretation.model_used}</Text>
             </View>
 
             {interpretation.symbols?.length > 0 && (
               <View style={styles.block}>
-                <Text style={styles.blockTitle}>✦ Key Symbols</Text>
+                <View style={styles.blockTitleRow}>
+                  <Ionicons name="key-outline" size={16} color={COLORS.primary} />
+                  <Text style={styles.blockTitle}>Key Symbols</Text>
+                </View>
                 {interpretation.symbols.map((sym, i) => (
                   <View key={i} style={[styles.symbolRow, i < interpretation.symbols.length - 1 && { borderBottomWidth: 1, borderBottomColor: COLORS.border }]}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.xs }}>
@@ -123,21 +146,30 @@ export default function DreamDetailScreen() {
 
             {interpretation.emotional_analysis && (
               <View style={styles.block}>
-                <Text style={styles.blockTitle}>💜 Emotional Landscape</Text>
+                <View style={styles.blockTitleRow}>
+                  <Ionicons name="heart-outline" size={16} color="#f472b6" />
+                  <Text style={styles.blockTitle}>Emotional Landscape</Text>
+                </View>
                 <Text style={styles.blockText}>{interpretation.emotional_analysis}</Text>
               </View>
             )}
 
             {interpretation.psychological_insight && (
               <View style={styles.block}>
-                <Text style={styles.blockTitle}>🧠 Psychological Insight</Text>
+                <View style={styles.blockTitleRow}>
+                  <Ionicons name="bulb-outline" size={16} color="#fbbf24" />
+                  <Text style={styles.blockTitle}>Psychological Insight</Text>
+                </View>
                 <Text style={styles.blockText}>{interpretation.psychological_insight}</Text>
               </View>
             )}
 
             {interpretation.archetypes?.length > 0 && (
               <View style={styles.block}>
-                <Text style={styles.blockTitle}>⚡ Archetypes</Text>
+                <View style={styles.blockTitleRow}>
+                  <Ionicons name="person-outline" size={16} color="#34d399" />
+                  <Text style={styles.blockTitle}>Archetypes</Text>
+                </View>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.xs }}>
                   {interpretation.archetypes.map(a => (
                     <View key={a} style={styles.archetypePillLarge}>
@@ -150,18 +182,25 @@ export default function DreamDetailScreen() {
 
             {interpretation.affirmation && (
               <View style={styles.affirmationCard}>
-                <Text style={styles.affirmationLabel}>✨ TODAY'S AFFIRMATION</Text>
+                <Text style={styles.affirmationLabel}>TODAY'S AFFIRMATION</Text>
                 <Text style={styles.affirmation}>"{interpretation.affirmation}"</Text>
               </View>
             )}
           </View>
-        ) : (
+        ) : isOwnDream ? (
           <InterpretationCard dream={dream} />
+        ) : (
+          <View style={styles.block}>
+            <Text style={styles.blockTitle}>AI Interpretation</Text>
+            <Text style={styles.blockText}>No interpretation available for this dream.</Text>
+          </View>
         )}
 
-        <TouchableOpacity onPress={handleDelete} style={styles.deleteBtn} disabled={isDeleting}>
-          <Text style={styles.deleteText}>{isDeleting ? 'Deleting...' : '🗑 Delete Dream'}</Text>
-        </TouchableOpacity>
+        {isOwnDream && (
+          <TouchableOpacity onPress={handleDelete} style={styles.deleteBtn} disabled={isDeleting}>
+            <Text style={styles.deleteText}>{isDeleting ? 'Deleting...' : 'Delete Dream'}</Text>
+          </TouchableOpacity>
+        )}
 
         <View style={{ height: 100 }} />
       </ScrollView>
@@ -171,11 +210,7 @@ export default function DreamDetailScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  header: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm,
-    borderBottomWidth: 1, borderBottomColor: COLORS.border,
-  },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderBottomWidth: 1, borderBottomColor: COLORS.border },
   backText: { color: COLORS.primary, fontSize: FONT_SIZES.md, fontWeight: '500', padding: SPACING.xs },
   headerActions: { flexDirection: 'row', gap: SPACING.md },
   actionText: { color: COLORS.primary, fontSize: FONT_SIZES.sm, fontWeight: '500', padding: SPACING.xs },

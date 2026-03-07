@@ -71,6 +71,10 @@ export default function RootLayout() {
             <Stack.Screen name="dream/[id]"       options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="dream/edit/[id]"  options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
             <Stack.Screen name="paywall"          options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="dictionary"       options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="notifications"     options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="privacy"           options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="edit-profile"      options={{ animation: 'slide_from_right' }} />
           </Stack>
         </SafeAreaProvider>
       </GestureHandlerRootView>
