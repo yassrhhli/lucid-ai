@@ -1,20 +1,13 @@
 import React, { useState, useRef, useCallback } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Switch,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
+  View, Text, TextInput, StyleSheet, ScrollView,
+  TouchableOpacity, Switch, Alert, KeyboardAvoidingView,
+  Platform, ActivityIndicator, StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { format } from 'date-fns';
 import { useDreams } from '@/hooks/useDreams';
 import { EmotionPicker } from '@/components/dream/EmotionPicker';
@@ -33,10 +26,9 @@ const SUGGESTED_TAGS = [
 export default function NewDreamScreen() {
   const { createDream, isCreating } = useDreams();
 
-  // Form state
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [dreamDate, setDreamDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [dreamDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [emotions, setEmotions] = useState<Emotion[]>([]);
   const [sleepQuality, setSleepQuality] = useState<SleepQuality | null>(null);
   const [tags, setTags] = useState<string[]>([]);
@@ -50,73 +42,60 @@ export default function NewDreamScreen() {
   const isOverLimit = contentLength > CONFIG.limits.maxDreamLength;
 
   const toggleTag = (tag: string) => {
-    setTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
+    setTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
   };
 
   const addCustomTag = () => {
     const cleaned = customTag.trim().toLowerCase().replace(/\s+/g, '-');
     if (cleaned && !tags.includes(cleaned) && tags.length < 10) {
-      setTags((prev) => [...prev, cleaned]);
+      setTags(prev => [...prev, cleaned]);
       setCustomTag('');
     }
   };
 
   const handleSave = useCallback(async () => {
-    if (!content.trim()) {
-      Alert.alert('Empty Dream', 'Please describe your dream before saving.');
-      return;
-    }
-    if (isOverLimit) {
-      Alert.alert('Too Long', `Maximum ${CONFIG.limits.maxDreamLength} characters.`);
-      return;
-    }
+    if (!content.trim()) { Alert.alert('Empty Dream', 'Please describe your dream before saving.'); return; }
+    if (isOverLimit) { Alert.alert('Too Long', `Maximum ${CONFIG.limits.maxDreamLength} characters.`); return; }
 
     const input: DreamCreateInput = {
       title: title.trim() || undefined,
       content: content.trim(),
       dream_date: dreamDate,
       sleep_quality: sleepQuality ?? undefined,
-      emotions,
-      tags,
-      is_lucid: isLucid,
-      is_recurring: isRecurring,
-      is_public: isPublic,
+      emotions, tags,
+      is_lucid: isLucid, is_recurring: isRecurring, is_public: isPublic,
     };
 
     try {
       const newDream = await createDream(input);
-      // Naviguer vers le détail avec option d'interprétation
       router.replace(`/dream/${newDream.id}`);
     } catch (error) {
       showErrorAlert(error, 'Save Failed', 'NewDreamScreen');
     }
-  }, [
-    content, title, dreamDate, sleepQuality, emotions,
-    tags, isLucid, isRecurring, isPublic, isOverLimit, createDream,
-  ]);
+  }, [content, title, dreamDate, sleepQuality, emotions, tags, isLucid, isRecurring, isPublic, isOverLimit, createDream]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        {/* Header */}
+      <StatusBar barStyle="light-content" />
+      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+
+        {/* ── Header ──────────────────────────────────────────────── */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.cancelBtn}>
-            <Text style={styles.cancelText}>Cancel</Text>
+          <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
+            <Ionicons name="close" size={22} color={COLORS.textSecondary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>New Dream</Text>
+          <View style={styles.headerCenter}>
+            <Ionicons name="moon" size={14} color={COLORS.accent} />
+            <Text style={styles.headerTitle}>New Dream</Text>
+          </View>
           <TouchableOpacity
             onPress={handleSave}
             disabled={isCreating || !content.trim()}
             style={[styles.saveBtn, (!content.trim() || isCreating) && styles.saveBtnDisabled]}
           >
             {isCreating
-              ? <ActivityIndicator size="small" color={COLORS.primary} />
-              : <Text style={styles.saveText}>Save</Text>
+              ? <ActivityIndicator size="small" color="#fff" />
+              : <Text style={styles.saveBtnText}>Save</Text>
             }
           </TouchableOpacity>
         </View>
@@ -127,18 +106,16 @@ export default function NewDreamScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Date */}
-          <View style={styles.dateRow}>
-            <Ionicons name='moon-outline' size={18} color='#a78bfa' />
-            <Text style={styles.dateText}>
-              {format(new Date(dreamDate + 'T12:00:00'), 'EEEE, MMMM d, yyyy')}
-            </Text>
+          {/* Date pill */}
+          <View style={styles.datePill}>
+            <Ionicons name="calendar-outline" size={13} color={COLORS.textMuted} />
+            <Text style={styles.dateText}>{format(new Date(dreamDate + 'T12:00:00'), 'EEEE, MMMM d, yyyy')}</Text>
           </View>
 
-          {/* Title (optionnel) */}
+          {/* Title */}
           <TextInput
             style={styles.titleInput}
-            placeholder="Give your dream a title... (optional)"
+            placeholder="Give your dream a title..."
             placeholderTextColor={COLORS.textMuted}
             value={title}
             onChangeText={setTitle}
@@ -147,14 +124,13 @@ export default function NewDreamScreen() {
             onSubmitEditing={() => contentRef.current?.focus()}
           />
 
-          {/* Divider */}
           <View style={styles.divider} />
 
-          {/* Dream content - champ principal */}
+          {/* Dream content */}
           <TextInput
             ref={contentRef}
             style={styles.contentInput}
-            placeholder="Describe your dream in as much detail as you can remember... What happened? Who was there? How did it feel?"
+            placeholder={"Describe your dream...\n\nWhat happened? Where were you? Who was there? How did it feel?"}
             placeholderTextColor={COLORS.textMuted}
             value={content}
             onChangeText={setContent}
@@ -163,58 +139,58 @@ export default function NewDreamScreen() {
             autoFocus
           />
 
-          {/* Counter */}
           <Text style={[styles.counter, isOverLimit && styles.counterError]}>
             {contentLength}/{CONFIG.limits.maxDreamLength}
           </Text>
 
           <View style={styles.divider} />
 
-          {/* Section : Émotions */}
+          {/* Emotions */}
           <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="heart-outline" size={15} color="#FB7185" />
+              <Text style={styles.sectionLabel}>Emotions</Text>
+            </View>
             <EmotionPicker selected={emotions} onChange={setEmotions} />
           </View>
 
           <View style={styles.divider} />
 
-          {/* Section : Qualité sommeil */}
+          {/* Sleep quality */}
           <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="bed-outline" size={15} color={COLORS.gold} />
+              <Text style={styles.sectionLabel}>Sleep Quality</Text>
+            </View>
             <SleepQualitySlider value={sleepQuality} onChange={setSleepQuality} />
           </View>
 
           <View style={styles.divider} />
 
-          {/* Section : Tags */}
+          {/* Tags */}
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Dream Themes</Text>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="pricetag-outline" size={15} color="#60A5FA" />
+              <Text style={styles.sectionLabel}>Dream Themes</Text>
+            </View>
             <View style={styles.tagsGrid}>
-              {SUGGESTED_TAGS.map((tag) => (
+              {SUGGESTED_TAGS.map(tag => (
                 <TouchableOpacity
                   key={tag}
                   onPress={() => toggleTag(tag)}
                   activeOpacity={0.7}
-                  style={[
-                    styles.tagChip,
-                    tags.includes(tag) && styles.tagChipSelected,
-                  ]}
+                  style={[styles.tagChip, tags.includes(tag) && styles.tagChipSelected]}
                 >
-                  <Text
-                    style={[
-                      styles.tagChipText,
-                      tags.includes(tag) && styles.tagChipTextSelected,
-                    ]}
-                  >
+                  <Text style={[styles.tagChipText, tags.includes(tag) && styles.tagChipTextSelected]}>
                     #{tag}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
-
-            {/* Custom tag */}
             <View style={styles.customTagRow}>
               <TextInput
                 style={styles.customTagInput}
-                placeholder="Add custom tag..."
+                placeholder="Custom tag..."
                 placeholderTextColor={COLORS.textMuted}
                 value={customTag}
                 onChangeText={setCustomTag}
@@ -223,84 +199,61 @@ export default function NewDreamScreen() {
                 autoCapitalize="none"
               />
               <TouchableOpacity onPress={addCustomTag} style={styles.addTagBtn}>
-                <Text style={styles.addTagText}>Add</Text>
+                <Ionicons name="add" size={18} color={COLORS.primaryBright} />
               </TouchableOpacity>
             </View>
-
-            {/* Tags sélectionnés (custom) */}
-            {tags.filter((t) => !SUGGESTED_TAGS.includes(t)).length > 0 && (
+            {tags.filter(t => !SUGGESTED_TAGS.includes(t)).length > 0 && (
               <View style={styles.customTagsRow}>
-                {tags
-                  .filter((t) => !SUGGESTED_TAGS.includes(t))
-                  .map((tag) => (
-                    <TouchableOpacity
-                      key={tag}
-                      onPress={() => toggleTag(tag)}
-                      style={styles.tagChipSelected}
-                    >
-                      <Text style={styles.tagChipTextSelected}>
-                        #{tag} ✕
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                {tags.filter(t => !SUGGESTED_TAGS.includes(t)).map(tag => (
+                  <TouchableOpacity key={tag} onPress={() => toggleTag(tag)} style={styles.tagChipSelected}>
+                    <Text style={styles.tagChipTextSelected}>#{tag} ✕</Text>
+                  </TouchableOpacity>
+                ))}
               </View>
             )}
           </View>
 
           <View style={styles.divider} />
 
-          {/* Section : Toggles */}
+          {/* Toggles */}
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Dream Properties</Text>
-
-            {[
-              {
-                key: 'lucid',
-                label: 'Lucid Dream',
-                sub: 'You were aware you were dreaming',
-                value: isLucid,
-                onChange: setIsLucid,
-              },
-              {
-                key: 'recurring',
-                label: 'Recurring Dream',
-                sub: "You've had this dream before",
-                value: isRecurring,
-                onChange: setIsRecurring,
-              },
-              {
-                key: 'public',
-                label: 'Share Anonymously',
-                sub: 'Post to the Dream Feed (anonymous)',
-                value: isPublic,
-                onChange: setIsPublic,
-              },
-            ].map(({ key, label, sub, value, onChange }) => (
-              <View key={key} style={styles.toggleRow}>
-                <View style={styles.toggleInfo}>
-                  <Text style={styles.toggleLabel}>{label}</Text>
-                  <Text style={styles.toggleSub}>{sub}</Text>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="options-outline" size={15} color={COLORS.accent} />
+              <Text style={styles.sectionLabel}>Properties</Text>
+            </View>
+            <View style={styles.togglesCard}>
+              {[
+                { key: 'lucid',     label: 'Lucid Dream',        sub: 'You were aware you were dreaming',  value: isLucid,     onChange: setIsLucid     },
+                { key: 'recurring', label: 'Recurring Dream',    sub: "You've had this dream before",       value: isRecurring, onChange: setIsRecurring, last: false },
+                { key: 'public',    label: 'Share Anonymously',  sub: 'Post to the Dream Feed',             value: isPublic,    onChange: setIsPublic,   last: true  },
+              ].map(({ key, label, sub, value, onChange, last }) => (
+                <View key={key} style={[styles.toggleRow, !last && styles.toggleBorder]}>
+                  <View style={styles.toggleInfo}>
+                    <Text style={styles.toggleLabel}>{label}</Text>
+                    <Text style={styles.toggleSub}>{sub}</Text>
+                  </View>
+                  <Switch
+                    value={value}
+                    onValueChange={onChange}
+                    trackColor={{ false: COLORS.borderSubtle, true: COLORS.primary + 'AA' }}
+                    thumbColor={value ? '#fff' : COLORS.textMuted}
+                    ios_backgroundColor={COLORS.borderSubtle}
+                  />
                 </View>
-                <Switch
-                  value={value}
-                  onValueChange={onChange}
-                  trackColor={{ false: COLORS.border, true: COLORS.primary + '80' }}
-                  thumbColor={value ? COLORS.primary : COLORS.textMuted}
-                />
-              </View>
-            ))}
+              ))}
+            </View>
           </View>
 
-          {/* CTA Save */}
-          <Button
-            title="Save Dream"
-            onPress={handleSave}
-            isLoading={isCreating}
-            disabled={!content.trim() || isOverLimit}
-            fullWidth
-            size="lg"
-            style={styles.saveButton}
-          />
+          {/* Save CTA */}
+          <View style={styles.saveCTA}>
+            <Button
+              title="Save Dream"
+              onPress={handleSave}
+              isLoading={isCreating}
+              disabled={!content.trim() || isOverLimit}
+              fullWidth size="lg"
+            />
+          </View>
 
           <View style={{ height: 40 }} />
         </ScrollView>
@@ -312,135 +265,81 @@ export default function NewDreamScreen() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   container: { flex: 1, backgroundColor: COLORS.background },
+
+  // Header
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm,
+    borderBottomWidth: 1, borderBottomColor: COLORS.borderSubtle,
   },
-  cancelBtn: { padding: SPACING.xs },
-  cancelText: { color: COLORS.textMuted, fontSize: FONT_SIZES.md },
-  headerTitle: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: '700',
-    color: COLORS.text,
+  headerBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: COLORS.surface, alignItems: 'center', justifyContent: 'center' },
+  headerCenter: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  headerTitle: { fontSize: FONT_SIZES.md, fontWeight: '700', color: COLORS.text },
+  saveBtn: {
+    backgroundColor: COLORS.primary, borderRadius: RADIUS.full,
+    paddingHorizontal: SPACING.md, paddingVertical: 8,
+    minWidth: 60, alignItems: 'center',
   },
-  saveBtn: { padding: SPACING.xs },
   saveBtnDisabled: { opacity: 0.4 },
-  saveText: {
-    color: COLORS.primary,
-    fontSize: FONT_SIZES.md,
-    fontWeight: '700',
-  },
+  saveBtnText: { color: '#fff', fontSize: FONT_SIZES.sm, fontWeight: '700' },
+
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: SPACING.lg },
-  dateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    paddingVertical: SPACING.md,
-  },
-  dateEmoji: { fontSize: 20 },
-  dateText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
-    fontWeight: '500',
-  },
-  titleInput: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: '700',
-    color: COLORS.text,
-    paddingVertical: SPACING.xs,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: COLORS.border,
+
+  datePill: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    alignSelf: 'flex-start',
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.full, paddingHorizontal: SPACING.md, paddingVertical: 6,
+    borderWidth: 1, borderColor: COLORS.borderSubtle,
     marginVertical: SPACING.md,
   },
-  contentInput: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text,
-    lineHeight: 24,
-    minHeight: 200,
-    paddingTop: 0,
-  },
-  counter: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.textMuted,
-    textAlign: 'right',
-    marginTop: SPACING.xs,
-  },
+  dateText: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, fontWeight: '500' },
+
+  titleInput: { fontSize: FONT_SIZES.xl, fontWeight: '700', color: COLORS.text, paddingVertical: SPACING.xs },
+
+  divider: { height: 1, backgroundColor: COLORS.borderSubtle, marginVertical: SPACING.lg },
+
+  contentInput: { fontSize: FONT_SIZES.md, color: COLORS.text, lineHeight: 26, minHeight: 200, paddingTop: 0 },
+  counter: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, textAlign: 'right', marginTop: SPACING.xs },
   counterError: { color: COLORS.error },
-  section: { gap: SPACING.sm },
-  sectionLabel: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
-    fontWeight: '600',
-    marginBottom: SPACING.xs,
-  },
-  tagsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.xs,
-  },
+
+  // Sections
+  section: { gap: SPACING.md },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs },
+  sectionLabel: { fontSize: FONT_SIZES.sm, fontWeight: '700', color: COLORS.textSecondary },
+
+  // Tags
+  tagsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.xs },
   tagChip: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.sm, paddingVertical: 6,
     borderRadius: RADIUS.full,
-    backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.borderSubtle,
   },
-  tagChipSelected: {
-    backgroundColor: COLORS.primary + '22',
-    borderColor: COLORS.primary,
-  },
-  tagChipText: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.textMuted,
-  },
-  tagChipTextSelected: {
-    color: COLORS.primary,
-    fontWeight: '600',
-  },
-  customTagRow: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
-    marginTop: SPACING.xs,
-  },
+  tagChipSelected: { backgroundColor: COLORS.primaryGlow, borderColor: COLORS.borderBright },
+  tagChipText: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, fontWeight: '500' },
+  tagChipTextSelected: { color: COLORS.accentSoft, fontWeight: '600' },
+  customTagRow: { flexDirection: 'row', gap: SPACING.xs },
   customTagInput: {
-    flex: 1,
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.md,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs + 2,
-    color: COLORS.text,
-    fontSize: FONT_SIZES.sm,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    flex: 1, backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.md, paddingHorizontal: SPACING.md, paddingVertical: 10,
+    color: COLORS.text, fontSize: FONT_SIZES.sm,
+    borderWidth: 1, borderColor: COLORS.borderSubtle,
   },
   addTagBtn: {
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.md,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs + 2,
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    width: 44, height: 44, borderRadius: RADIUS.md,
+    backgroundColor: COLORS.primaryGlow, borderWidth: 1, borderColor: COLORS.borderBright,
+    alignItems: 'center', justifyContent: 'center',
   },
-  addTagText: { color: COLORS.primary, fontWeight: '600', fontSize: FONT_SIZES.sm },
-  customTagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.xs, marginTop: SPACING.xs },
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: SPACING.xs,
-  },
+  customTagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.xs },
+
+  // Toggles
+  togglesCard: { backgroundColor: COLORS.surface, borderRadius: RADIUS.xl, borderWidth: 1, borderColor: COLORS.borderSubtle, overflow: 'hidden' },
+  toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: SPACING.md },
+  toggleBorder: { borderBottomWidth: 1, borderBottomColor: COLORS.borderSubtle },
   toggleInfo: { flex: 1, marginRight: SPACING.md },
-  toggleLabel: { fontSize: FONT_SIZES.md, color: COLORS.text, fontWeight: '500' },
+  toggleLabel: { fontSize: FONT_SIZES.md, color: COLORS.text, fontWeight: '600' },
   toggleSub: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, marginTop: 2 },
-  saveButton: { marginTop: SPACING.xl },
+
+  saveCTA: { marginTop: SPACING.xl },
 });

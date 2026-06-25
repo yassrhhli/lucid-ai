@@ -1,229 +1,156 @@
 import { create } from 'zustand';
 import { supabase } from '@/services/supabase';
-import type { AuthUser, Profile } from '@/types/user';
-import type { Session } from '@supabase/supabase-js';
+import { initRevenueCat } from '@/services/revenuecat';
+import type { User, Session } from '@supabase/supabase-js';
+import type { Profile } from '@/types/dream';
 
 interface AuthState {
-  user: AuthUser | null;
-  session: Session | null;
-  isLoading: boolean;
-  isInitialized: boolean;
+  user:            User | null;
+  profile:         Profile | null;
+  session:         Session | null;
+  isAuthenticated: boolean;
+  isLoading:       boolean;
+  isPro:           boolean;
 
-  // Actions
-  initialize: () => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<void>;
+  initialize:       () => Promise<void>;
+  signIn:           (email: string, password: string) => Promise<void>;
+  signUp:           (email: string, password: string, username?: string) => Promise<void>;
+  signOut:          () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
-  signInWithApple: () => Promise<void>;
-  signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
-  updateProfile: (updates: Partial<Profile>) => Promise<void>;
-  refreshProfile: () => Promise<void>;
+  signInWithApple:  () => Promise<void>;
+  refreshProfile:   () => Promise<void>;
+  updateProfile:    (updates: Partial<Profile>) => Promise<void>;
+}
+
+// ── Helper module-level (non exposé dans le store) ────────────
+async function loadUserProfile(
+  user: User,
+  session: Session,
+  set: (state: Partial<AuthState>) => void,
+) {
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  set({
+    user,
+    session,
+    profile:         profile ?? null,
+    isAuthenticated: true,
+    isPro:           profile?.is_pro ?? false,
+    isLoading:       false,
+  });
+
+  // RevenueCat en background — non bloquant
+  initRevenueCat(user.id).catch(() => {});
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  user: null,
-  session: null,
-  isLoading: false,
-  isInitialized: false,
+  user:            null,
+  profile:         null,
+  session:         null,
+  isAuthenticated: false,
+  isLoading:       true,
+  isPro:           false,
 
   initialize: async () => {
+    set({ isLoading: true });
     try {
       const { data: { session } } = await supabase.auth.getSession();
-
       if (session?.user) {
-        const profile = await fetchProfile(session.user.id);
-        set({
-          session,
-          user: {
-            id: session.user.id,
-            email: session.user.email ?? null,
-            profile,
-          },
-          isInitialized: true,
-        });
+        await loadUserProfile(session.user, session, set);
       } else {
-        set({ isInitialized: true });
+        set({ isLoading: false });
       }
 
-      // Écoute les changements d'auth
+      // Écouter les changements d'auth (token refresh, signout, etc.)
       supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
-          const profile = await fetchProfile(session.user.id);
-          set({
-            session,
-            user: {
-              id: session.user.id,
-              email: session.user.email ?? null,
-              profile,
-            },
-          });
+          await loadUserProfile(session.user, session, set);
         } else if (event === 'SIGNED_OUT') {
-          set({ session: null, user: null });
+          set({
+            user: null, profile: null, session: null,
+            isAuthenticated: false, isPro: false, isLoading: false,
+          });
         } else if (event === 'TOKEN_REFRESHED' && session) {
           set({ session });
         }
       });
-    } catch (error) {
-      console.error('[AuthStore] Initialize error:', error);
-      set({ isInitialized: true });
-    }
-  },
-
-  signUp: async (email: string, password: string) => {
-    set({ isLoading: true });
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: 'lucidai://auth/callback',
-        },
-      });
-
-      if (error) throw error;
-
-      if (data.user && !data.session) {
-        // Email de confirmation envoyé
-        throw new Error('CHECK_EMAIL');
-      }
-    } finally {
-      set({ isLoading: false });
+    } catch {
+      set({ isAuthenticated: false, isLoading: false });
     }
   },
 
   signIn: async (email: string, password: string) => {
-    set({ isLoading: true });
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
-      const profile = await fetchProfile(data.user.id);
-      set({
-        session: data.session,
-        user: {
-          id: data.user.id,
-          email: data.user.email ?? null,
-          profile,
-        },
-      });
-    } finally {
-      set({ isLoading: false });
-    }
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    });
+    if (error) throw error;
+    // onAuthStateChange → SIGNED_IN gère le reste
   },
 
-  signInWithGoogle: async () => {
-    set({ isLoading: true });
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: 'lucidai://auth/callback',
-        },
-      });
-      if (error) throw error;
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
-  signInWithApple: async () => {
-    set({ isLoading: true });
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'apple',
-        options: {
-          redirectTo: 'lucidai://auth/callback',
-        },
-      });
-      if (error) throw error;
-    } finally {
-      set({ isLoading: false });
-    }
+  signUp: async (email: string, password: string, username?: string) => {
+    const { error } = await supabase.auth.signUp({
+      email: email.trim().toLowerCase(),
+      password,
+      options: {
+        data: { username: username?.trim() ?? email.split('@')[0] },
+      },
+    });
+    if (error) throw error;
   },
 
   signOut: async () => {
-    set({ isLoading: true });
-    try {
-      await supabase.auth.signOut();
-      set({ user: null, session: null });
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
-  resetPassword: async (email: string) => {
-    set({ isLoading: true });
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'lucidai://auth/reset-password',
-      });
-      if (error) throw error;
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
-  updateProfile: async (updates: Partial<Profile>) => {
-    const { user } = get();
-    if (!user) throw new Error('Not authenticated');
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', user.id)
-      .select()
-      .single();
-
-    if (error) throw error;
-
+    await supabase.auth.signOut();
     set({
-      user: {
-        ...user,
-        profile: data as Profile,
-      },
+      user: null, profile: null, session: null,
+      isAuthenticated: false, isPro: false,
     });
+  },
+
+  signInWithGoogle: async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: 'lucidai://auth/callback' },
+    });
+    if (error) throw error;
+  },
+
+  signInWithApple: async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'apple',
+      options: { redirectTo: 'lucidai://auth/callback' },
+    });
+    if (error) throw error;
   },
 
   refreshProfile: async () => {
     const { user } = get();
     if (!user) return;
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    if (profile) {
+      set({ profile, isPro: profile.is_pro ?? false });
+    }
+  },
 
-    const profile = await fetchProfile(user.id);
-    set({ user: { ...user, profile } });
+  updateProfile: async (updates: Partial<Profile>) => {
+    const { user } = get();
+    if (!user) return;
+    const { error } = await supabase
+      .from('profiles')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', user.id);
+    if (error) throw error;
+    set(state => ({
+      profile: state.profile ? { ...state.profile, ...updates } : null,
+      isPro: updates.is_pro !== undefined ? updates.is_pro : state.isPro,
+    }));
   },
 }));
-
-// Helper interne
-async function fetchProfile(userId: string): Promise<Profile | null> {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .single();
-
-  if (error) {
-    // Profil inexistant → le créer (premier login)
-    if (error.code === 'PGRST116') {
-      const { data: newProfile, error: createError } = await supabase
-        .from('profiles')
-        .insert({ id: userId })
-        .select()
-        .single();
-
-      if (createError) {
-        console.error('[AuthStore] Profile creation error:', createError);
-        return null;
-      }
-      return newProfile as Profile;
-    }
-    console.error('[AuthStore] fetchProfile error:', error);
-    return null;
-  }
-
-  return data as Profile;
-}

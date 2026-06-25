@@ -4,44 +4,44 @@ export class AppError extends Error {
   constructor(
     message: string,
     public code?: string,
-    public userFacing?: boolean
+    public userFacing?: boolean,
   ) {
     super(message);
     this.name = 'AppError';
   }
 }
 
-export function handleError(error: unknown, context?: string): string {
-  const prefix = context ? `[${context}]` : '';
+// Map des messages d'erreur Supabase → messages utilisateur
+const SUPABASE_ERROR_MAP: Record<string, string> = {
+  'Invalid login credentials':              'Incorrect email or password.',
+  'Email not confirmed':                    'Please check your email and confirm your account.',
+  'User already registered':               'An account with this email already exists.',
+  'Password should be at least 6 characters': 'Password must be at least 6 characters.',
+  'JWT expired':                            'Your session has expired. Please sign in again.',
+  'Network request failed':                 'No internet connection. Please check your connection.',
+  'fetch failed':                           'Connection failed. Please try again.',
+  'timeout':                                'Request timed out. Please try again.',
+  'duplicate key value':                    'This record already exists.',
+  'foreign key constraint':                 'Referenced record not found.',
+  'permission denied':                      'You don\'t have permission to perform this action.',
+};
 
-  if (error instanceof AppError) {
-    console.error(`${prefix} AppError:`, error.message, error.code);
+export function handleError(error: unknown, context?: string): string {
+  if (error instanceof AppError && error.userFacing !== false) {
     return error.message;
   }
 
   if (error instanceof Error) {
-    console.error(`${prefix} Error:`, error.message);
-
-    // Mapper les erreurs Supabase communes
-    const supabaseMessages: Record<string, string> = {
-      'Invalid login credentials': 'Incorrect email or password.',
-      'Email not confirmed': 'Please verify your email address first.',
-      'User already registered': 'An account with this email already exists.',
-      'Password should be at least 6 characters': 'Password must be at least 6 characters.',
-      'CHECK_EMAIL': 'Please check your email to confirm your account.',
-      'JWT expired': 'Your session has expired. Please sign in again.',
-      'Network request failed': 'No internet connection. Please try again.',
-    };
-
-    for (const [key, msg] of Object.entries(supabaseMessages)) {
+    // Chercher un message connu dans la map
+    for (const [key, msg] of Object.entries(SUPABASE_ERROR_MAP)) {
       if (error.message.includes(key)) return msg;
     }
-
-    return error.message;
+    // En développement, retourner le message brut
+    if (__DEV__) return `[${context ?? 'Error'}] ${error.message}`;
+    return 'Something went wrong. Please try again.';
   }
 
-  console.error(`${prefix} Unknown error:`, error);
-  return 'An unexpected error occurred. Please try again.';
+  return 'An unexpected error occurred.';
 }
 
 export function showErrorAlert(error: unknown, title = 'Error', context?: string): void {
@@ -50,12 +50,18 @@ export function showErrorAlert(error: unknown, title = 'Error', context?: string
 }
 
 export function isNetworkError(error: unknown): boolean {
-  if (error instanceof Error) {
-    return (
-      error.message.includes('Network request failed') ||
-      error.message.includes('fetch failed') ||
-      error.message.includes('timeout')
-    );
-  }
-  return false;
+  if (!(error instanceof Error)) return false;
+  return (
+    error.message.includes('Network request failed') ||
+    error.message.includes('fetch failed') ||
+    error.message.includes('timeout') ||
+    error.message.includes('ECONNREFUSED')
+  );
 }
+
+// Logger conditionnel — rien en production
+export const logger = {
+  info:  (...args: any[]) => { if (__DEV__) console.log(...args); },
+  warn:  (...args: any[]) => { if (__DEV__) console.warn(...args); },
+  error: (...args: any[]) => { if (__DEV__) console.error(...args); },
+};

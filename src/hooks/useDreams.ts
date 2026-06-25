@@ -17,7 +17,7 @@ export function useDreams() {
   const createDream = useCallback(
     async (input: DreamCreateInput) => {
       if (!user?.id) throw new Error('Not authenticated');
-      return store.createDream(user.id, input);
+      return store.createDream(input);
     },
     [user?.id]
   );

@@ -17,14 +17,14 @@ import { COLORS } from '@/constants/theme';
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const { initialize, isInitialized, user } = useAuthStore();
+  const { initialize, isLoading, user } = useAuthStore();
   const { initialize: initSubscription } = useSubscriptionStore();
 
   useEffect(() => {
     const boot = async () => {
       try {
-        initAdMob().catch(console.error); // non-bloquant
-        await initialize();              // bloquant — nécessaire pour le routing
+        initAdMob().catch(console.error);
+        await initialize();
       } catch (error) {
         console.error('[Boot] error:', error);
       } finally {
@@ -34,7 +34,6 @@ export default function RootLayout() {
     boot();
   }, []);
 
-  // Init RevenueCat + Analytics quand user connecté
   useEffect(() => {
     if (user?.id) {
       initSubscription(user.id).catch(console.error);
@@ -46,7 +45,6 @@ export default function RootLayout() {
     }
   }, [user?.id]);
 
-  // Listener notifications push → navigation automatique
   useEffect(() => {
     const cleanup = setupNotificationResponseListener((screen) => {
       router.push(screen as any);
@@ -54,7 +52,7 @@ export default function RootLayout() {
     return cleanup;
   }, []);
 
-  if (!isInitialized) {
+  if (isLoading) {
     return <LoadingSpinner fullScreen label="Loading..." />;
   }
 
@@ -64,17 +62,17 @@ export default function RootLayout() {
         <SafeAreaProvider>
           <StatusBar style="light" />
           <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(auth)"          options={{ animation: 'fade' }} />
-            <Stack.Screen name="(tabs)"          options={{ animation: 'fade' }} />
+            <Stack.Screen name="(auth)"           options={{ animation: 'fade' }} />
+            <Stack.Screen name="(tabs)"           options={{ animation: 'fade' }} />
             <Stack.Screen name="onboarding/index" options={{ animation: 'slide_from_right', gestureEnabled: false }} />
             <Stack.Screen name="dream/new"        options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
             <Stack.Screen name="dream/[id]"       options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="dream/edit/[id]"  options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
             <Stack.Screen name="paywall"          options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
             <Stack.Screen name="dictionary"       options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="notifications"     options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="privacy"           options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="edit-profile"      options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="notifications"    options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="privacy"          options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="edit-profile"     options={{ animation: 'slide_from_right' }} />
           </Stack>
         </SafeAreaProvider>
       </GestureHandlerRootView>
