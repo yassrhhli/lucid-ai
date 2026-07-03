@@ -20,10 +20,8 @@ export default {
       bundleIdentifier: "com.lucidai.app",
       buildNumber: "1",
       infoPlist: {
-        NSMicrophoneUsageDescription: "Used to record your dream descriptions by voice",
-        NSCameraUsageDescription: "Used to update your profile photo",
         UIBackgroundModes: ["fetch", "remote-notification"],
-        GADApplicationIdentifier: "ca-app-pub-3940256099942544~1458002511"
+        GADApplicationIdentifier: process.env.EXPO_PUBLIC_ADMOB_IOS_APP_ID || "ca-app-pub-placeholder~ios"
       }
     },
     android: {
@@ -43,9 +41,12 @@ export default {
         color: "#7c3aed",
         defaultChannel: "default"
       }],
+      ["expo-tracking-transparency", {
+        "userTrackingPermission": "We use your data to provide personalized ads and improve your experience."
+      }],
       ["react-native-google-mobile-ads", {
-        androidAppId: "ca-app-pub-3940256099942544~3347511713",
-        iosAppId: "ca-app-pub-3940256099942544~1458002511"
+        androidAppId: process.env.EXPO_PUBLIC_ADMOB_ANDROID_APP_ID || "ca-app-pub-placeholder~android",
+        iosAppId: process.env.EXPO_PUBLIC_ADMOB_IOS_APP_ID || "ca-app-pub-placeholder~ios"
       }]
     ],
     experiments: { typedRoutes: true },

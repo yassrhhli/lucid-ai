@@ -20,6 +20,7 @@ interface AuthState {
   signInWithApple:  () => Promise<void>;
   refreshProfile:   () => Promise<void>;
   updateProfile:    (updates: Partial<Profile>) => Promise<void>;
+  resetPassword:    (email: string) => Promise<void>;
 }
 
 // ── Helper module-level (non exposé dans le store) ────────────
@@ -123,6 +124,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'apple',
       options: { redirectTo: 'lucidai://auth/callback' },
+    });
+    if (error) throw error;
+  },
+
+  resetPassword: async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      redirectTo: 'lucidai://auth/reset-password',
     });
     if (error) throw error;
   },

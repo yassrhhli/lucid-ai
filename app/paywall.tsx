@@ -80,9 +80,9 @@ export default function PaywallScreen() {
       <View style={styles.bgGlow} pointerEvents="none" />
 
       {/* Close */}
-      <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn}>
+      <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} onPress={() => router.back()} style={styles.closeBtn} accessibilityLabel="Close" accessibilityRole="button">
         <View style={styles.closeWrap}>
-          <Ionicons name="close" size={18} color={COLORS.textSecondary} />
+          <Ionicons name="close" size={24} color={COLORS.textSecondary} />
         </View>
       </TouchableOpacity>
 
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(123,94,167,0.12)',
   },
   closeBtn: { position: 'absolute', top: 56, right: SPACING.lg, zIndex: 20 },
-  closeWrap: { width: 34, height: 34, borderRadius: 17, backgroundColor: COLORS.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: COLORS.borderSubtle },
+  closeWrap: { width: 44, height: 44, borderRadius: 22, backgroundColor: COLORS.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: COLORS.borderSubtle },
 
   scroll: { paddingHorizontal: SPACING.lg },
 

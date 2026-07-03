@@ -11,6 +11,7 @@ import {
 import { router } from 'expo-router';
 import { useInterpretation } from '@/hooks/useInterpretation';
 import { useAuth } from '@/hooks/useAuth';
+import { useAds } from '@/hooks/useAds';
 import { Button } from '@/components/ui/Button';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
 import type { Dream } from '@/types/dream';
@@ -23,7 +24,7 @@ interface InterpretationCardProps {
 export function InterpretationCard({ dream, onSuccess }: InterpretationCardProps) {
   const { isPro, profile } = useAuth();
   const { isLoading, error, quotaExceeded, quotaInfo, interpret } = useInterpretation();
-  const [showRewardedAd, setShowRewardedAd] = useState(false);
+  const { showRewardedForInterpretation } = useAds();
 
   const weeklyUsed = profile?.interpretation_count_week ?? 0;
   const weeklyLimit = 3;
@@ -33,6 +34,13 @@ export function InterpretationCard({ dream, onSuccess }: InterpretationCardProps
   const handleInterpret = async () => {
     const result = await interpret(dream.id);
     if (result) onSuccess?.();
+  };
+
+  const handleWatchAd = async () => {
+    const earned = await showRewardedForInterpretation();
+    if (earned) {
+      await handleInterpret();
+    }
   };
 
   // Quota épuisé — afficher upsell
@@ -56,7 +64,7 @@ export function InterpretationCard({ dream, onSuccess }: InterpretationCardProps
           />
 
           <TouchableOpacity
-            onPress={() => setShowRewardedAd(true)}
+            onPress={handleWatchAd}
             style={styles.rewardedBtn}
           >
             <Text style={styles.rewardedText}>
@@ -155,11 +163,14 @@ export function InterpretationCard({ dream, onSuccess }: InterpretationCardProps
             fullWidth
             size="lg"
           />
-          <TouchableOpacity style={styles.rewardedBtn}>
+          <TouchableOpacity style={styles.rewardedBtn} onPress={handleWatchAd}>
             <Text style={styles.rewardedText}>Watch ad for 1 free interpretation</Text>
           </TouchableOpacity>
         </View>
       )}
+      <Text style={styles.disclaimerText}>
+        Disclaimer: AI interpretations are for entertainment and self-reflection purposes only. They are not a substitute for professional psychological advice.
+      </Text>
     </View>
   );
 }
@@ -237,4 +248,5 @@ const styles = StyleSheet.create({
   quotaTitle: { fontSize: FONT_SIZES.xl, fontWeight: '800', color: COLORS.text },
   quotaSub: { fontSize: FONT_SIZES.sm, color: COLORS.textMuted, textAlign: 'center', lineHeight: 20 },
   quotaOptions: { width: '100%', gap: SPACING.sm },
+  disclaimerText: { fontSize: 10, color: COLORS.textMuted, textAlign: 'center', marginTop: SPACING.xs, lineHeight: 14 },
 });

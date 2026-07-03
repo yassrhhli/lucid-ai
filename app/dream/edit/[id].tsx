@@ -20,6 +20,8 @@ import { SleepQualitySlider } from '@/components/dream/SleepQualitySlider';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { showErrorAlert } from '@/utils/errorHandler';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
+import { checkRateLimit } from '@/utils/rateLimit';
+import { sanitizeDreamContent, sanitizeTitle } from '@/utils/sanitize';
 import type { Emotion, SleepQuality } from '@/types/dream';
 
 export default function EditDreamScreen() {
@@ -43,15 +45,17 @@ export default function EditDreamScreen() {
   if (!dream) return <LoadingSpinner fullScreen />;
 
   const handleSave = async () => {
-    if (!content.trim()) {
+    if (!checkRateLimit(`updateDream:${dream.id}`, 1, 3000)) return;
+    const cleanContent = sanitizeDreamContent(content);
+    if (!cleanContent) {
       Alert.alert('Empty Dream', 'Dream content cannot be empty.');
       return;
     }
     setIsSaving(true);
     try {
       await updateDream(dream.id, {
-        title: title.trim() || undefined,
-        content: content.trim(),
+        title: sanitizeTitle(title) || undefined,
+        content: cleanContent,
         emotions,
         sleep_quality: sleepQuality ?? undefined,
         is_lucid: isLucid,
@@ -73,7 +77,7 @@ export default function EditDreamScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.cancelBtn}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.cancelBtn} accessibilityLabel="Cancel" accessibilityRole="button">
             <Text style={styles.cancelText}>Cancel</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Edit Dream</Text>
@@ -89,16 +93,19 @@ export default function EditDreamScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          <Text style={styles.inputLabel}>Title</Text>
           <TextInput
             style={styles.titleInput}
             placeholder="Title (optional)"
             placeholderTextColor={COLORS.textMuted}
             value={title}
             onChangeText={setTitle}
+            accessibilityLabel="Dream title"
           />
 
           <View style={styles.divider} />
 
+          <Text style={styles.inputLabel}>Your Dream</Text>
           <TextInput
             style={styles.contentInput}
             value={content}
@@ -107,6 +114,7 @@ export default function EditDreamScreen() {
             textAlignVertical="top"
             placeholder="Your dream..."
             placeholderTextColor={COLORS.textMuted}
+            accessibilityLabel="Dream content"
           />
 
           <View style={styles.divider} />
@@ -166,6 +174,7 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.xs,
   },
   divider: { height: 1, backgroundColor: COLORS.border, marginVertical: SPACING.md },
+  inputLabel: { fontSize: FONT_SIZES.xs, fontWeight: '600', color: COLORS.textSecondary, letterSpacing: 0.5, marginBottom: SPACING.xs, textTransform: 'uppercase' },
   contentInput: {
     fontSize: FONT_SIZES.md,
     color: COLORS.text,

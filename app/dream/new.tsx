@@ -16,6 +16,8 @@ import { Button } from '@/components/ui/Button';
 import { showErrorAlert } from '@/utils/errorHandler';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
 import { CONFIG } from '@/constants/config';
+import { checkRateLimit } from '@/utils/rateLimit';
+import { sanitizeDreamContent, sanitizeTitle } from '@/utils/sanitize';
 import type { Emotion, SleepQuality, DreamCreateInput } from '@/types/dream';
 
 const SUGGESTED_TAGS = [
@@ -54,12 +56,14 @@ export default function NewDreamScreen() {
   };
 
   const handleSave = useCallback(async () => {
-    if (!content.trim()) { Alert.alert('Empty Dream', 'Please describe your dream before saving.'); return; }
+    if (!checkRateLimit('createDream', 1, 3000)) return;
+    const cleanContent = sanitizeDreamContent(content);
+    if (!cleanContent) { Alert.alert('Empty Dream', 'Please describe your dream before saving.'); return; }
     if (isOverLimit) { Alert.alert('Too Long', `Maximum ${CONFIG.limits.maxDreamLength} characters.`); return; }
 
     const input: DreamCreateInput = {
-      title: title.trim() || undefined,
-      content: content.trim(),
+      title: sanitizeTitle(title) || undefined,
+      content: cleanContent,
       dream_date: dreamDate,
       sleep_quality: sleepQuality ?? undefined,
       emotions, tags,
@@ -81,7 +85,7 @@ export default function NewDreamScreen() {
 
         {/* ── Header ──────────────────────────────────────────────── */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn} accessibilityLabel="Close" accessibilityRole="button">
             <Ionicons name="close" size={22} color={COLORS.textSecondary} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
@@ -113,6 +117,7 @@ export default function NewDreamScreen() {
           </View>
 
           {/* Title */}
+          <Text style={styles.inputLabel}>Title</Text>
           <TextInput
             style={styles.titleInput}
             placeholder="Give your dream a title..."
@@ -122,21 +127,24 @@ export default function NewDreamScreen() {
             maxLength={CONFIG.limits.maxTitleLength}
             returnKeyType="next"
             onSubmitEditing={() => contentRef.current?.focus()}
+            accessibilityLabel="Dream title"
           />
 
           <View style={styles.divider} />
 
           {/* Dream content */}
+          <Text style={styles.inputLabel}>Your Dream</Text>
           <TextInput
             ref={contentRef}
             style={styles.contentInput}
-            placeholder={"Describe your dream...\n\nWhat happened? Where were you? Who was there? How did it feel?"}
+            placeholder={"What happened? Where were you? Who was there? How did it feel?"}
             placeholderTextColor={COLORS.textMuted}
             value={content}
             onChangeText={setContent}
             multiline
             textAlignVertical="top"
             autoFocus
+            accessibilityLabel="Dream content"
           />
 
           <Text style={[styles.counter, isOverLimit && styles.counterError]}>
@@ -272,7 +280,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm,
     borderBottomWidth: 1, borderBottomColor: COLORS.borderSubtle,
   },
-  headerBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: COLORS.surface, alignItems: 'center', justifyContent: 'center' },
+  headerBtn: { width: 44, height: 44, borderRadius: 14, backgroundColor: COLORS.surface, alignItems: 'center', justifyContent: 'center' },
   headerCenter: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   headerTitle: { fontSize: FONT_SIZES.md, fontWeight: '700', color: COLORS.text },
   saveBtn: {
@@ -297,6 +305,7 @@ const styles = StyleSheet.create({
   dateText: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, fontWeight: '500' },
 
   titleInput: { fontSize: FONT_SIZES.xl, fontWeight: '700', color: COLORS.text, paddingVertical: SPACING.xs },
+  inputLabel: { fontSize: FONT_SIZES.xs, fontWeight: '600', color: COLORS.textSecondary, letterSpacing: 0.5, marginBottom: SPACING.xs, textTransform: 'uppercase' },
 
   divider: { height: 1, backgroundColor: COLORS.borderSubtle, marginVertical: SPACING.lg },
 

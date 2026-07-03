@@ -4,14 +4,16 @@ import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { useAuthStore } from '@/stores/authStore';
 import { useSubscriptionStore } from '@/stores/subscriptionStore';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { NetworkBanner } from '@/components/ui/NetworkBanner';
 import { initAdMob } from '@/services/admob';
 import { analytics } from '@/utils/analytics';
 import { setupNotificationResponseListener } from '@/utils/notifications';
+import * as TrackingTransparency from 'expo-tracking-transparency';
 import { COLORS } from '@/constants/theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -24,6 +26,12 @@ export default function RootLayout() {
     const boot = async () => {
       try {
         initAdMob().catch(console.error);
+        
+        // Request App Tracking Transparency on iOS
+        if (Platform.OS === 'ios') {
+          await TrackingTransparency.requestTrackingPermissionsAsync();
+        }
+
         await initialize();
       } catch (error) {
         console.error('[Boot] error:', error);
@@ -60,6 +68,7 @@ export default function RootLayout() {
     <ErrorBoundary>
       <GestureHandlerRootView style={styles.root}>
         <SafeAreaProvider>
+          <NetworkBanner />
           <StatusBar style="light" />
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(auth)"           options={{ animation: 'fade' }} />

@@ -41,7 +41,7 @@
     <key>CFBundleVersion</key>
     <string>1</string>
     <key>GADApplicationIdentifier</key>
-    <string>ca-app-pub-3940256099942544~1458002511</string>
+    <string>ca-app-pub-placeholder~ios</string>
     <key>GADDelayAppMeasurementInit</key>
     <false/>
     <key>LSMinimumSystemVersion</key>
@@ -55,12 +55,8 @@
       <key>NSAllowsLocalNetworking</key>
       <true/>
     </dict>
-    <key>NSCameraUsageDescription</key>
-    <string>Used to update your profile photo</string>
-    <key>NSFaceIDUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your Face ID biometric data.</string>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>Used to record your dream descriptions by voice</string>
+    <key>NSUserTrackingUsageDescription</key>
+    <string>We use your data to provide personalized ads and improve your experience.</string>
     <key>NSUserActivityTypes</key>
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>

@@ -34,7 +34,7 @@ export default function EditProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.back()} accessibilityLabel="Go back" accessibilityRole="button">
           <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
         </TouchableOpacity>
         <Text style={styles.title}>Edit Profile</Text>
@@ -120,6 +120,6 @@ const styles = StyleSheet.create({
   planRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   proBadge: { backgroundColor: '#FFD70022', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 3, borderWidth: 1, borderColor: '#FFD70055' },
   proBadgeText: { color: '#FFD700', fontSize: FONT_SIZES.xs, fontWeight: '700' },
-  upgradeBtn: { backgroundColor: COLORS.primary, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 4 },
-  upgradeBtnText: { color: '#fff', fontSize: FONT_SIZES.xs, fontWeight: '700' },
+  upgradeBtn: { backgroundColor: COLORS.primary, borderRadius: 8, paddingHorizontal: 16, height: 44, justifyContent: 'center', alignItems: 'center' },
+  upgradeBtnText: { color: '#fff', fontSize: FONT_SIZES.sm, fontWeight: '700' },
 });

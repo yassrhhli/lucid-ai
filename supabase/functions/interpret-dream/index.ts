@@ -110,8 +110,9 @@ serve(async (req) => {
     catch { return json({ error: 'Invalid JSON body' }, 400, origin); }
 
     const dream_id = body.dream_id?.trim?.();
-    if (!dream_id || typeof dream_id !== 'string') {
-      return json({ error: 'dream_id is required' }, 400, origin);
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!dream_id || typeof dream_id !== 'string' || !UUID_REGEX.test(dream_id)) {
+      return json({ error: 'Invalid dream_id (must be a valid UUID)' }, 400, origin);
     }
 
     // ── 3. Vérifier que le rêve appartient à cet utilisateur ─
@@ -253,8 +254,8 @@ serve(async (req) => {
     return json({ interpretation }, 200, origin);
 
   } catch (err: any) {
-    // Log minimal — pas de stack trace en prod
-    const message = err instanceof Error ? err.message : String(err);
-    return json({ error: 'Internal server error', ref: message.slice(0, 100) }, 500, origin);
+    // Logger l'erreur technique côté serveur uniquement
+    console.error('Interpret Dream Error:', err);
+    return json({ error: 'Internal server error' }, 500, origin);
   }
 });

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   TouchableOpacity, Text, StyleSheet, ActivityIndicator,
-  ViewStyle, TextStyle, View,
+  ViewStyle, TextStyle, View, Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONT_SIZES, RADIUS, SPACING } from '@/constants/theme';
@@ -36,6 +36,14 @@ export function Button({
   icon, iconPosition = 'left',
   style, textStyle, fullWidth = false,
 }: ButtonProps) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const onPressIn = () => {
+    Animated.spring(scaleAnim, { toValue: 0.96, useNativeDriver: true, speed: 50, bounciness: 4 }).start();
+  };
+  const onPressOut = () => {
+    Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, speed: 50, bounciness: 4 }).start();
+  };
   const isDisabled = disabled || isLoading;
   const gradient = GRADIENT_COLORS[variant];
 
@@ -58,21 +66,26 @@ export function Button({
 
   if (gradient && variant !== 'secondary' && variant !== 'ghost') {
     return (
-      <TouchableOpacity onPress={onPress} disabled={isDisabled} activeOpacity={0.82} style={[containerStyle, styles.shadowWrap]}>
-        <LinearGradient colors={gradient} style={[styles.gradientInner, styles[size]]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-          {inner}
-        </LinearGradient>
-      </TouchableOpacity>
+      <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+        <TouchableOpacity onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut} disabled={isDisabled} activeOpacity={0.82} style={[containerStyle, styles.shadowWrap]}>
+          <LinearGradient colors={gradient} style={[styles.gradientInner, styles[size]]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+            {inner}
+          </LinearGradient>
+        </TouchableOpacity>
+      </Animated.View>
     );
   }
 
   return (
-    <TouchableOpacity
-      onPress={onPress} disabled={isDisabled} activeOpacity={0.8}
-      style={[containerStyle, styles[variant]]}
-    >
-      {inner}
-    </TouchableOpacity>
+    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+      <TouchableOpacity
+        onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut}
+        disabled={isDisabled} activeOpacity={0.8}
+        style={[containerStyle, styles[variant]]}
+      >
+        {inner}
+      </TouchableOpacity>
+    </Animated.View>
   );
 }
 
@@ -93,7 +106,7 @@ const styles = StyleSheet.create({
   gold:      { backgroundColor: COLORS.gold },
 
   // Sizes
-  sm: { paddingHorizontal: SPACING.md,  paddingVertical: SPACING.xs + 2, minHeight: 36 },
+  sm: { paddingHorizontal: SPACING.md,  paddingVertical: SPACING.sm,     minHeight: 44 },
   md: { paddingHorizontal: SPACING.lg,  paddingVertical: SPACING.sm + 4, minHeight: 48 },
   lg: { paddingHorizontal: SPACING.xl,  paddingVertical: SPACING.md,     minHeight: 56 },
 

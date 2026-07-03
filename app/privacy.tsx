@@ -17,9 +17,10 @@ export default function PrivacyScreen() {
           text: 'Delete Everything',
           style: 'destructive',
           onPress: async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-              await supabase.from('dreams').delete().eq('user_id', user.id);
+            const { error } = await supabase.functions.invoke('delete-account');
+            if (error) {
+              Alert.alert('Error', 'Failed to delete account. Please try again.');
+            } else {
               await supabase.auth.signOut();
             }
           },

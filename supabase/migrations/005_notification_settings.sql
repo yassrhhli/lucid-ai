@@ -1,0 +1,5 @@
+ALTER TABLE public.profiles 
+  ADD COLUMN IF NOT EXISTS morning_reminder_enabled BOOLEAN DEFAULT TRUE,
+  ADD COLUMN IF NOT EXISTS dream_tips_enabled BOOLEAN DEFAULT TRUE,
+  ADD COLUMN IF NOT EXISTS weekly_report_enabled BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS lucid_techniques_enabled BOOLEAN DEFAULT FALSE;

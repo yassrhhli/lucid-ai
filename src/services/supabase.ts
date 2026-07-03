@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
 import { CONFIG } from '@/constants/config';
+import NetInfo from '@react-native-community/netinfo';
 
 // Adapter SecureStore avec chunking pour dépasser la limite 2048 bytes
 const CHUNK_SIZE = 1800;
@@ -55,6 +56,13 @@ export const supabase = createClient(
     global: {
       headers: {
         'x-app-version': '1.0.0',
+      },
+      fetch: async (url, options) => {
+        const net = await NetInfo.fetch();
+        if (!net.isConnected) {
+          throw new Error('No internet connection');
+        }
+        return fetch(url, options);
       },
     },
   }
