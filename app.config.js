@@ -21,7 +21,7 @@ export default {
       buildNumber: "1",
       infoPlist: {
         UIBackgroundModes: ["fetch", "remote-notification"],
-        GADApplicationIdentifier: process.env.EXPO_PUBLIC_ADMOB_IOS_APP_ID || "ca-app-pub-placeholder~ios"
+        GADApplicationIdentifier: process.env.EXPO_PUBLIC_ADMOB_IOS_APP_ID || "ca-app-pub-3940256099942544~1458002511"
       }
     },
     android: {
@@ -45,8 +45,8 @@ export default {
         "userTrackingPermission": "We use your data to provide personalized ads and improve your experience."
       }],
       ["react-native-google-mobile-ads", {
-        androidAppId: process.env.EXPO_PUBLIC_ADMOB_ANDROID_APP_ID || "ca-app-pub-placeholder~android",
-        iosAppId: process.env.EXPO_PUBLIC_ADMOB_IOS_APP_ID || "ca-app-pub-placeholder~ios"
+        androidAppId: process.env.EXPO_PUBLIC_ADMOB_ANDROID_APP_ID || "ca-app-pub-3940256099942544~3347511713",
+        iosAppId: process.env.EXPO_PUBLIC_ADMOB_IOS_APP_ID || "ca-app-pub-3940256099942544~1458002511"
       }]
     ],
     experiments: { typedRoutes: true },
