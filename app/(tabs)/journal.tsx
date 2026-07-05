@@ -119,8 +119,10 @@ export default function JournalScreen() {
         <LoadingSpinner label="Loading your dreams..." />
       ) : filtered.length === 0 ? (
         <View style={styles.empty}>
-          <View style={styles.emptyIcon}>
-            <Ionicons name="moon-outline" size={40} color={COLORS.accent} />
+          <View style={styles.emptyIconOuter}>
+            <View style={styles.emptyIconInner}>
+              <Ionicons name="moon-outline" size={40} color={COLORS.accent} />
+            </View>
           </View>
           <Text style={styles.emptyTitle}>{search ? 'No dreams found' : 'No dreams yet'}</Text>
           <Text style={styles.emptySub}>
@@ -187,11 +189,22 @@ const styles = StyleSheet.create({
   groupLine: { flex: 1, height: 1, backgroundColor: COLORS.borderSubtle },
 
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: SPACING.xl, gap: SPACING.md },
-  emptyIcon: {
-    width: 80, height: 80, borderRadius: 24,
+  emptyIconOuter: {
+    width: 120, height: 120, borderRadius: 60,
     backgroundColor: COLORS.primaryGlow,
     alignItems: 'center', justifyContent: 'center',
     marginBottom: SPACING.xs,
+  },
+  emptyIconInner: {
+    width: 80, height: 80, borderRadius: 40,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1, borderColor: COLORS.borderBright,
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#6B46C1',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 14,
+    elevation: 8,
   },
   emptyTitle: { fontSize: FONT_SIZES.xl, fontWeight: '700', color: COLORS.text, textAlign: 'center' },
   emptySub: { fontSize: FONT_SIZES.sm, color: COLORS.textMuted, textAlign: 'center', lineHeight: 22 },

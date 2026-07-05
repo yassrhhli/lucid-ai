@@ -61,10 +61,12 @@ export default function PatternsScreen() {
         <StatusBar barStyle="light-content" />
         <View style={styles.glow} pointerEvents="none" />
         <ScrollView contentContainerStyle={styles.gateScroll} showsVerticalScrollIndicator={false}>
-          <View style={styles.gateIconWrap}>
-            <LinearGradient colors={['#4A2D8A', '#7B5EA7']} style={styles.gateIconGrad}>
-              <Ionicons name="stats-chart" size={36} color="#fff" />
-            </LinearGradient>
+          <View style={styles.gateIconOuterGlow}>
+            <View style={styles.gateIconWrap}>
+              <LinearGradient colors={['#4A2D8A', '#7B5EA7']} style={styles.gateIconGrad}>
+                <Ionicons name="stats-chart" size={36} color="#fff" />
+              </LinearGradient>
+            </View>
           </View>
           <Text style={styles.gateTitle}>Dream Patterns</Text>
           <Text style={styles.gateSub}>
@@ -74,25 +76,42 @@ export default function PatternsScreen() {
           {/* Blurred preview grid */}
           <View style={styles.previewGrid}>
             {[
-              { label: 'Top Emotions',       icon: 'heart-outline'   },
-              { label: 'Recurring Themes',   icon: 'repeat-outline'  },
-              { label: 'Archetype Profile',  icon: 'person-outline'  },
-              { label: 'Sleep Trend',        icon: 'bed-outline'     },
-            ].map(({ label, icon }) => (
+              { label: 'Top Emotions',       icon: 'heart-outline',   color: '#FB7185' },
+              { label: 'Recurring Themes',   icon: 'repeat-outline',  color: '#60A5FA' },
+              { label: 'Archetype Profile',  icon: 'person-outline',  color: COLORS.accent },
+              { label: 'Sleep Trend',        icon: 'bed-outline',     color: COLORS.gold },
+            ].map(({ label, icon, color }) => (
               <View key={label} style={styles.previewCard}>
-                <Ionicons name={icon as any} size={22} color={COLORS.accent} />
+                <View style={styles.previewLockBadge}>
+                  <Ionicons name="lock-closed" size={9} color={COLORS.textMuted} />
+                </View>
+                <View style={[styles.previewIconWrap, { backgroundColor: color + '18' }]}>
+                  <Ionicons name={icon as any} size={18} color={color} />
+                </View>
                 <Text style={styles.previewLabel}>{label}</Text>
                 <View style={styles.previewBlurBars}>
-                  <View style={[styles.blurBar, { width: '80%', opacity: 0.25 }]} />
-                  <View style={[styles.blurBar, { width: '55%', opacity: 0.15 }]} />
-                  <View style={[styles.blurBar, { width: '65%', opacity: 0.1  }]} />
+                  <View style={[styles.blurBar, { width: '80%', backgroundColor: color, opacity: 0.28 }]} />
+                  <View style={[styles.blurBar, { width: '55%', backgroundColor: color, opacity: 0.18 }]} />
+                  <View style={[styles.blurBar, { width: '65%', backgroundColor: color, opacity: 0.1  }]} />
                 </View>
               </View>
             ))}
           </View>
 
-          <Button title="Unlock with Pro" onPress={() => router.push('/paywall')} variant="gold" fullWidth size="lg" />
-          <Text style={styles.gateHint}>From $2.92/month · Cancel anytime</Text>
+          <View style={styles.ctaGlowWrap}>
+            <Button
+              title="Unlock with Pro"
+              onPress={() => router.push('/paywall')}
+              variant="gold"
+              fullWidth
+              size="lg"
+              icon={<Ionicons name="sparkles" size={17} color="#fff" />}
+            />
+          </View>
+          <View style={styles.gateHintRow}>
+            <Ionicons name="shield-checkmark-outline" size={12} color={COLORS.textMuted} />
+            <Text style={styles.gateHint}>From $2.92/month · Cancel anytime</Text>
+          </View>
           <View style={{ height: 40 }} />
         </ScrollView>
       </SafeAreaView>
@@ -270,20 +289,37 @@ const styles = StyleSheet.create({
   gateScroll: { paddingHorizontal: SPACING.lg, alignItems: 'center', paddingTop: SPACING.xl },
 
   // Gate
-  gateIconWrap: { marginBottom: SPACING.lg, shadowColor: '#7B5EA7', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 10 },
+  gateIconOuterGlow: {
+    marginBottom: SPACING.lg,
+    borderRadius: 60,
+    padding: 8,
+    backgroundColor: 'rgba(123,94,167,0.14)',
+  },
+  gateIconWrap: { shadowColor: '#7B5EA7', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.45, shadowRadius: 18, elevation: 10 },
   gateIconGrad: { width: 80, height: 80, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   gateTitle: { fontSize: FONT_SIZES['2xl'], fontWeight: '800', color: COLORS.text, textAlign: 'center', marginBottom: SPACING.sm, letterSpacing: -0.5 },
   gateSub: { fontSize: FONT_SIZES.sm, color: COLORS.textMuted, textAlign: 'center', lineHeight: 22, marginBottom: SPACING.xl },
-  gateHint: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, marginTop: SPACING.md },
+  gateHintRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: SPACING.md },
+  gateHint: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted },
   previewGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm, width: '100%', marginBottom: SPACING.xl },
   previewCard: {
     flex: 1, minWidth: '45%', backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg, padding: SPACING.md,
     borderWidth: 1, borderColor: COLORS.borderSubtle, gap: SPACING.xs,
+    position: 'relative', overflow: 'hidden',
   },
+  previewLockBadge: {
+    position: 'absolute', top: SPACING.sm, right: SPACING.sm,
+    width: 18, height: 18, borderRadius: 9,
+    backgroundColor: COLORS.surfaceElevated,
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: COLORS.borderSubtle,
+  },
+  previewIconWrap: { width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   previewLabel: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, fontWeight: '600' },
   previewBlurBars: { gap: 5, marginTop: SPACING.xs },
-  blurBar: { height: 6, backgroundColor: COLORS.accent, borderRadius: 3 },
+  blurBar: { height: 6, borderRadius: 3 },
+  ctaGlowWrap: { width: '100%', shadowColor: COLORS.gold, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 16, elevation: 4 },
 
   emptyCenter: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: SPACING.xl, gap: SPACING.md },
   progressWrap: { width: '100%', height: 6, backgroundColor: COLORS.surface, borderRadius: 3, overflow: 'hidden', marginTop: SPACING.sm },

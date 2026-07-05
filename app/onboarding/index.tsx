@@ -222,7 +222,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.lg,
   },
-  slideEmoji: { fontSize: 96 },
   slideTitle: {
     fontSize: FONT_SIZES['3xl'],
     fontWeight: '900',
@@ -250,7 +249,6 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: SPACING.md,
   },
-  notifEmoji: { fontSize: 32 },
   notifTitle: { fontSize: FONT_SIZES.md, fontWeight: '700', color: COLORS.text },
   notifSub: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, marginTop: 2 },
   dots: {

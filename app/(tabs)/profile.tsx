@@ -57,10 +57,17 @@ export default function ProfileScreen() {
         <LinearGradient colors={['#1A0D3A', '#0e0e1f']} style={styles.avatarCard} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
           <View style={styles.avatarRow}>
             <View style={styles.avatarWrap}>
-              <LinearGradient colors={['#6B46C1', '#8B5CF6']} style={styles.avatar}>
+              <View style={styles.avatarGlow} />
+              <LinearGradient colors={['#8B5CF6', '#6B46C1']} style={styles.avatar} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
                 <Text style={styles.avatarInitial}>{initial}</Text>
               </LinearGradient>
-              <TouchableOpacity style={styles.editAvatarBtn} onPress={() => router.push('/edit-profile')}>
+              <TouchableOpacity
+                style={styles.editAvatarBtn}
+                onPress={() => router.push('/edit-profile')}
+                accessibilityLabel="Edit avatar"
+                accessibilityRole="button"
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              >
                 <Ionicons name="pencil" size={11} color="#fff" />
               </TouchableOpacity>
             </View>
@@ -173,12 +180,23 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   avatarRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
-  avatarWrap: { position: 'relative' },
-  avatar: { width: 64, height: 64, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  avatarWrap: { position: 'relative', width: 64, height: 64, alignItems: 'center', justifyContent: 'center' },
+  avatarGlow: {
+    position: 'absolute',
+    width: 80, height: 80, borderRadius: 40,
+    backgroundColor: '#8B5CF6',
+    opacity: 0.35,
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.9,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  avatar: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center' },
   avatarInitial: { fontSize: FONT_SIZES['2xl'], fontWeight: '800', color: '#fff' },
   editAvatarBtn: {
     position: 'absolute', bottom: -2, right: -2,
-    width: 22, height: 22, borderRadius: 8,
+    width: 22, height: 22, borderRadius: 11,
     backgroundColor: COLORS.primary,
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 2, borderColor: COLORS.background,
