@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/hooks/useAuth';
 import { useDreams } from '@/hooks/useDreams';
 import { COLORS, FONT_SIZES, SPACING, RADIUS, GRADIENTS } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 import { format } from 'date-fns';
 
 const QUICK_ACTIONS = [
@@ -55,7 +56,13 @@ export default function HomeScreen() {
         </View>
 
         {/* ── Record CTA ─────────────────────────────────────────────── */}
-        <TouchableOpacity onPress={() => router.push('/dream/new')} activeOpacity={0.88} style={styles.ctaShadow}>
+        <TouchableOpacity
+          onPress={() => { haptics.medium(); router.push('/dream/new'); }}
+          activeOpacity={0.88}
+          style={styles.ctaShadow}
+          accessibilityLabel="Record a dream"
+          accessibilityRole="button"
+        >
           <LinearGradient colors={['#3D1F8A', '#6B46C1', '#8B5CF6']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.ctaGradient}>
             {/* Stars decoration */}
             <View style={styles.star1} />
@@ -112,7 +119,13 @@ export default function HomeScreen() {
 
         {/* ── Pro upsell ─────────────────────────────────────────────── */}
         {!profile?.is_pro && (
-          <TouchableOpacity onPress={() => router.push('/paywall')} activeOpacity={0.88} style={styles.upsellShadow}>
+          <TouchableOpacity
+            onPress={() => { haptics.light(); router.push('/paywall'); }}
+            activeOpacity={0.88}
+            style={styles.upsellShadow}
+            accessibilityLabel="Unlock Lucid Pro"
+            accessibilityRole="button"
+          >
             <LinearGradient colors={['#1A0D3A', '#241450', '#1A0D3A']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.upsell}>
               <View style={styles.upsellLeft}>
                 <View style={styles.upsellStarWrap}>

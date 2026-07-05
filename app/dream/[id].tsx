@@ -63,7 +63,7 @@ export default function DreamDetailScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityLabel="Go back" accessibilityRole="button">
           <Ionicons name="arrow-back" size={22} color={COLORS.primary} />
         </TouchableOpacity>
         <View style={styles.headerActions}>

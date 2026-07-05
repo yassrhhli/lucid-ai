@@ -39,6 +39,8 @@ export function DreamCard({ dream, onLongPress }: DreamCardProps) {
       onLongPress={() => onLongPress?.(dream)}
       activeOpacity={0.78}
       style={styles.card}
+      accessibilityLabel={dream.title || 'Untitled dream'}
+      accessibilityHint="Opens dream detail. Long press for edit and delete options."
     >
       {/* Sleep quality accent bar */}
       <View style={[styles.qualityBar, { backgroundColor: qualityColor }]} />
@@ -106,7 +108,15 @@ export function DreamCard({ dream, onLongPress }: DreamCardProps) {
             </View>
           )}
 
-          <Ionicons name="chevron-forward" size={14} color={COLORS.textMuted} style={{ marginLeft: 'auto' }} />
+          <TouchableOpacity
+            onPress={() => onLongPress?.(dream)}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            style={styles.moreBtn}
+            accessibilityLabel="More options"
+            accessibilityRole="button"
+          >
+            <Ionicons name="ellipsis-vertical" size={14} color={COLORS.textMuted} />
+          </TouchableOpacity>
         </View>
       </View>
     </TouchableOpacity>
@@ -140,6 +150,7 @@ const styles = StyleSheet.create({
   preview: { fontSize: FONT_SIZES.sm, color: COLORS.textSecondary, lineHeight: 20 },
 
   footer: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs, marginTop: 2 },
+  moreBtn: { marginLeft: 'auto', padding: 2 },
   emotions: { flexDirection: 'row', gap: 3 },
   tags: { flexDirection: 'row', gap: 4 },
   tagChip: { backgroundColor: COLORS.surfaceElevated, borderRadius: RADIUS.sm, paddingHorizontal: 6, paddingVertical: 2 },

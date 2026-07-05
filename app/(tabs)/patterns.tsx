@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useDreams } from '@/hooks/useDreams';
 import { Button } from '@/components/ui/Button';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 import type { Dream, Emotion } from '@/types/dream';
 
 const EMOTION_META: Record<string, { icon: string; color: string }> = {
@@ -101,7 +102,7 @@ export default function PatternsScreen() {
           <View style={styles.ctaGlowWrap}>
             <Button
               title="Unlock with Pro"
-              onPress={() => router.push('/paywall')}
+              onPress={() => { haptics.light(); router.push('/paywall'); }}
               variant="gold"
               fullWidth
               size="lg"

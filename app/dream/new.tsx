@@ -18,6 +18,7 @@ import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
 import { CONFIG } from '@/constants/config';
 import { checkRateLimit } from '@/utils/rateLimit';
 import { sanitizeDreamContent, sanitizeTitle } from '@/utils/sanitize';
+import { haptics } from '@/utils/haptics';
 import type { Emotion, SleepQuality, DreamCreateInput } from '@/types/dream';
 
 const SUGGESTED_TAGS = [
@@ -44,12 +45,14 @@ export default function NewDreamScreen() {
   const isOverLimit = contentLength > CONFIG.limits.maxDreamLength;
 
   const toggleTag = (tag: string) => {
+    haptics.selection();
     setTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
   };
 
   const addCustomTag = () => {
     const cleaned = customTag.trim().toLowerCase().replace(/\s+/g, '-');
     if (cleaned && !tags.includes(cleaned) && tags.length < 10) {
+      haptics.selection();
       setTags(prev => [...prev, cleaned]);
       setCustomTag('');
     }
@@ -72,8 +75,10 @@ export default function NewDreamScreen() {
 
     try {
       const newDream = await createDream(input);
+      haptics.success();
       router.replace(`/dream/${newDream.id}`);
     } catch (error) {
+      haptics.error();
       showErrorAlert(error, 'Save Failed', 'NewDreamScreen');
     }
   }, [content, title, dreamDate, sleepQuality, emotions, tags, isLucid, isRecurring, isPublic, isOverLimit, createDream]);
@@ -96,6 +101,9 @@ export default function NewDreamScreen() {
             onPress={handleSave}
             disabled={isCreating || !content.trim()}
             style={[styles.saveBtn, (!content.trim() || isCreating) && styles.saveBtnDisabled]}
+            accessibilityLabel="Save dream"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: isCreating || !content.trim() }}
           >
             {isCreating
               ? <ActivityIndicator size="small" color="#fff" />
@@ -205,8 +213,14 @@ export default function NewDreamScreen() {
                 onSubmitEditing={addCustomTag}
                 returnKeyType="done"
                 autoCapitalize="none"
+                accessibilityLabel="Add a custom tag"
               />
-              <TouchableOpacity onPress={addCustomTag} style={styles.addTagBtn}>
+              <TouchableOpacity
+                onPress={addCustomTag}
+                style={styles.addTagBtn}
+                accessibilityLabel="Add tag"
+                accessibilityRole="button"
+              >
                 <Ionicons name="add" size={18} color={COLORS.primaryBright} />
               </TouchableOpacity>
             </View>

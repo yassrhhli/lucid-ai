@@ -10,6 +10,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useAuth } from '@/hooks/useAuth';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 
 const FEATURES = [
   { icon: 'infinite-outline',        label: 'Unlimited AI dream interpretations',   highlight: true  },
@@ -42,14 +43,16 @@ export default function PaywallScreen() {
 
   const handlePurchase = async () => {
     const pkg = getPackage(selectedPlan);
-    if (!pkg) { Alert.alert('Not Available', 'Please try again.'); return; }
+    if (!pkg) { haptics.error(); Alert.alert('Not Available', 'Please try again.'); return; }
     const success = await purchase(pkg);
     if (success) {
+      haptics.success();
       await refreshProfile();
       Alert.alert('Welcome to Pro! 🎉', 'Unlimited access unlocked.', [
         { text: "Let's Go!", onPress: () => router.back() },
       ]);
     } else if (error) {
+      haptics.error();
       Alert.alert('Purchase Failed', error);
     }
   };
@@ -57,11 +60,13 @@ export default function PaywallScreen() {
   const handleRestore = async () => {
     const isPro = await restore();
     if (isPro) {
+      haptics.success();
       await refreshProfile();
       Alert.alert('Restored! ✅', 'Your subscription has been restored.', [
         { text: 'Continue', onPress: () => router.back() },
       ]);
     } else {
+      haptics.warning();
       Alert.alert('No Purchase Found', 'No active subscription found for this account.');
     }
   };
@@ -117,7 +122,14 @@ export default function PaywallScreen() {
           {plans.map(({ key, name, priceLabel, badge, saving }) => {
             const selected = selectedPlan === key;
             return (
-              <TouchableOpacity key={key} onPress={() => setSelectedPlan(key)} activeOpacity={0.8}>
+              <TouchableOpacity
+                key={key}
+                onPress={() => { haptics.selection(); setSelectedPlan(key); }}
+                activeOpacity={0.8}
+                accessibilityLabel={`${name} plan, ${priceLabel}`}
+                accessibilityRole="radio"
+                accessibilityState={{ selected }}
+              >
                 <View style={[styles.planCard, selected && styles.planCardSelected]}>
                   {badge && (
                     <LinearGradient colors={[COLORS.gold, '#C98B2A']} style={styles.planBadge} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
@@ -143,7 +155,15 @@ export default function PaywallScreen() {
         </View>
 
         {/* ── CTA ──────────────────────────────────────────────────── */}
-        <TouchableOpacity onPress={handlePurchase} disabled={isPurchasing || isLoading} activeOpacity={0.88} style={styles.ctaShadow}>
+        <TouchableOpacity
+          onPress={handlePurchase}
+          disabled={isPurchasing || isLoading}
+          activeOpacity={0.88}
+          style={styles.ctaShadow}
+          accessibilityLabel={selectedPlan === 'lifetime' ? 'Buy lifetime access' : 'Start 7-day free trial'}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isPurchasing || isLoading }}
+        >
           <LinearGradient colors={['#5B3FA0', '#8B6AC4']} style={styles.ctaBtn} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
             {isPurchasing ? (
               <ActivityIndicator color="#fff" size="small" />

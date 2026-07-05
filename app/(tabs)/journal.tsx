@@ -14,6 +14,7 @@ import { DreamCard } from '@/components/dream/DreamCard';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import type { Dream } from '@/types/dream';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 
 function groupDreamsByDate(dreams: Dream[]): { title: string; data: Dream[] }[] {
   const groups: Record<string, Dream[]> = {};
@@ -52,13 +53,16 @@ export default function JournalScreen() {
   }
 
   const handleLongPress = (dream: Dream) => {
+    haptics.light();
     Alert.alert(dream.title ?? 'Dream', 'What do you want to do?', [
       { text: 'Edit',   onPress: () => router.push(`/dream/edit/${dream.id}`) },
-      { text: 'Delete', style: 'destructive', onPress: () =>
+      { text: 'Delete', style: 'destructive', onPress: () => {
+          haptics.warning();
           Alert.alert('Delete Dream', 'This cannot be undone.', [
             { text: 'Cancel', style: 'cancel' },
-            { text: 'Delete', style: 'destructive', onPress: () => deleteDream(dream.id) },
-          ])
+            { text: 'Delete', style: 'destructive', onPress: () => { deleteDream(dream.id); haptics.success(); } },
+          ]);
+        }
       },
       { text: 'Cancel', style: 'cancel' },
     ]);
@@ -94,7 +98,12 @@ export default function JournalScreen() {
             {dreams.length} {dreams.length === 1 ? 'entry' : 'entries'} · {dreams.filter(d => d.interpretation).length} interpreted
           </Text>
         </View>
-        <TouchableOpacity onPress={() => router.push('/dream/new')} style={styles.addBtn}>
+        <TouchableOpacity
+          onPress={() => { haptics.light(); router.push('/dream/new'); }}
+          style={styles.addBtn}
+          accessibilityLabel="Record a new dream"
+          accessibilityRole="button"
+        >
           <LinearGradient colors={['#6B46C1', '#8B5CF6']} style={styles.addBtnGrad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
             <Ionicons name="add" size={22} color="#fff" />
           </LinearGradient>
