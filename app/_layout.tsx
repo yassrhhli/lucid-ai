@@ -19,7 +19,7 @@ import { COLORS } from '@/constants/theme';
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const { initialize, isLoading, user } = useAuthStore();
+  const { initialize, isLoading, user, profile } = useAuthStore();
   const { initialize: initSubscription } = useSubscriptionStore();
 
   useEffect(() => {
@@ -47,8 +47,8 @@ export default function RootLayout() {
       initSubscription(user.id).catch(console.error);
       analytics.identify(user.id, {
         email: user.email ?? '',
-        is_pro: user.profile?.is_pro ?? false,
-        streak: user.profile?.streak_days ?? 0,
+        is_pro: profile?.is_pro ?? false,
+        streak: profile?.streak_days ?? 0,
       });
     }
   }, [user?.id]);

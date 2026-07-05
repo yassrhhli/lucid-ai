@@ -10,7 +10,7 @@ export function useDreams() {
   // Chargement auto au montage
   useEffect(() => {
     if (user?.id) {
-      store.fetchDreams(user.id);
+      store.fetchDreams();
     }
   }, [user?.id]);
 
@@ -23,7 +23,7 @@ export function useDreams() {
   );
 
   const refresh = useCallback(() => {
-    if (user?.id) store.fetchDreams(user.id, true);
+    if (user?.id) store.fetchDreams();
   }, [user?.id]);
 
   return {

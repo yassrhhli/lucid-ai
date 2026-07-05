@@ -14,7 +14,7 @@ export function useStableCallback<T extends (...args: any[]) => any>(fn: T): T {
  * usePrevious — retourne la valeur précédente
  */
 export function usePrevious<T>(value: T): T | undefined {
-  const ref = useRef<T>();
+  const ref = useRef<T | undefined>(undefined);
   const previous = ref.current;
   ref.current = value;
   return previous;

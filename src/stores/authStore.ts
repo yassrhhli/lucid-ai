@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { supabase } from '@/services/supabase';
 import { initRevenueCat } from '@/services/revenuecat';
 import type { User, Session } from '@supabase/supabase-js';
-import type { Profile } from '@/types/dream';
+import type { Profile } from '@/types/user';
 
 interface AuthState {
   user:            User | null;
@@ -10,6 +10,7 @@ interface AuthState {
   session:         Session | null;
   isAuthenticated: boolean;
   isLoading:       boolean;
+  isInitialized:   boolean;
   isPro:           boolean;
 
   initialize:       () => Promise<void>;
@@ -42,6 +43,7 @@ async function loadUserProfile(
     isAuthenticated: true,
     isPro:           profile?.is_pro ?? false,
     isLoading:       false,
+    isInitialized:   true,
   });
 
   // RevenueCat en background — non bloquant
@@ -54,6 +56,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   session:         null,
   isAuthenticated: false,
   isLoading:       true,
+  isInitialized:   false,
   isPro:           false,
 
   initialize: async () => {
@@ -63,7 +66,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (session?.user) {
         await loadUserProfile(session.user, session, set);
       } else {
-        set({ isLoading: false });
+        set({ isLoading: false, isInitialized: true });
       }
 
       // Écouter les changements d'auth (token refresh, signout, etc.)
@@ -80,7 +83,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
       });
     } catch {
-      set({ isAuthenticated: false, isLoading: false });
+      set({ isAuthenticated: false, isLoading: false, isInitialized: true });
     }
   },
 

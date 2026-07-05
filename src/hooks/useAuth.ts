@@ -3,9 +3,11 @@ import { useAuthStore } from '@/stores/authStore';
 export function useAuth() {
   const {
     user,
+    profile,
     session,
     isLoading,
     isInitialized,
+    isPro,
     signIn,
     signUp,
     signOut,
@@ -22,8 +24,8 @@ export function useAuth() {
     isLoading,
     isInitialized,
     isAuthenticated: !!session,
-    isPro: user?.profile?.is_pro ?? false,
-    profile: user?.profile ?? null,
+    isPro,
+    profile,
     signIn,
     signUp,
     signOut,

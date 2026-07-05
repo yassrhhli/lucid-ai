@@ -63,6 +63,8 @@ export interface DreamCreateInput {
   is_public: boolean;
 }
 
+export type DreamUpdateInput = Partial<DreamCreateInput>;
+
 export interface FeedPost {
   id: string;
   dream_id: string;

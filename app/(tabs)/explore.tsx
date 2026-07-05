@@ -142,7 +142,7 @@ export default function ExploreScreen() {
 
           {(item.dream?.tags ?? []).length > 0 && (
             <View style={styles.tags}>
-              {(item.dream.tags ?? []).slice(0, 3).map(t => (
+              {(item.dream?.tags ?? []).slice(0, 3).map(t => (
                 <View key={t} style={styles.tag}>
                   <Text style={styles.tagText}>#{t}</Text>
                 </View>

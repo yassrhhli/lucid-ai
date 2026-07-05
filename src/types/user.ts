@@ -12,6 +12,10 @@ export interface Profile {
   interpretation_reset_at: string;
   streak_days: number;
   last_dream_at: string | null;
+  morning_reminder_enabled: boolean;
+  dream_tips_enabled: boolean;
+  weekly_report_enabled: boolean;
+  lucid_techniques_enabled: boolean;
   created_at: string;
   updated_at: string;
 }

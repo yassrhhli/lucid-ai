@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { supabase } from '@/services/supabase';
 import { interpretDream } from '@/services/openai';
-import type { Dream, DreamCreateInput, DreamUpdateInput, InterpretationResult } from '@/types/dream';
+import type { InterpretationResult } from '@/services/openai';
+import type { Dream, DreamCreateInput, DreamUpdateInput } from '@/types/dream';
 
 // ── Normaliser le retour Supabase (array ou objet) ─────────────
 function normalizeDream(raw: any): Dream {
@@ -15,6 +16,7 @@ interface DreamState {
   dreams: Dream[];
   isLoading: boolean;
   isCreating: boolean;
+  isDeleting: boolean;
   error: string | null;
 
   // Actions
@@ -32,6 +34,7 @@ export const useDreamStore = create<DreamState>((set, get) => ({
   dreams: [],
   isLoading: false,
   isCreating: false,
+  isDeleting: false,
   error: null,
 
   // ── Fetch tous les rêves de l'utilisateur ──────────────────
@@ -131,7 +134,7 @@ export const useDreamStore = create<DreamState>((set, get) => ({
   deleteDream: async (id: string): Promise<void> => {
     // Retirer immédiatement de la liste (optimistic)
     const previous = get().dreams;
-    set(state => ({ dreams: state.dreams.filter(d => d.id !== id) }));
+    set(state => ({ dreams: state.dreams.filter(d => d.id !== id), isDeleting: true }));
 
     const { error } = await supabase
       .from('dreams')
@@ -140,9 +143,10 @@ export const useDreamStore = create<DreamState>((set, get) => ({
 
     if (error) {
       // Rollback
-      set({ dreams: previous });
+      set({ dreams: previous, isDeleting: false });
       throw error;
     }
+    set({ isDeleting: false });
   },
 
   // ── Interpréter un rêve ────────────────────────────────────

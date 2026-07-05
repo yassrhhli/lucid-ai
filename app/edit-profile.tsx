@@ -7,8 +7,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
 
 export default function EditProfileScreen() {
-  const { user, updateProfile } = useAuth();
-  const [username, setUsername] = useState(user?.profile?.username || '');
+  const { user, profile, updateProfile } = useAuth();
+  const [username, setUsername] = useState(profile?.username || '');
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
@@ -79,8 +79,8 @@ export default function EditProfileScreen() {
         <View style={styles.card}>
           <Text style={styles.fieldLabel}>MEMBER SINCE</Text>
           <Text style={styles.fieldValue}>
-            {user?.profile?.created_at
-              ? new Date(user.profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+            {profile?.created_at
+              ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
               : 'Recently'}
           </Text>
         </View>
@@ -88,8 +88,8 @@ export default function EditProfileScreen() {
         <View style={styles.card}>
           <Text style={styles.fieldLabel}>PLAN</Text>
           <View style={styles.planRow}>
-            <Text style={styles.fieldValue}>{user?.profile?.is_pro ? 'Lucid Pro' : 'Free'}</Text>
-            {user?.profile?.is_pro
+            <Text style={styles.fieldValue}>{profile?.is_pro ? 'Lucid Pro' : 'Free'}</Text>
+            {profile?.is_pro
               ? <View style={styles.proBadge}><Text style={styles.proBadgeText}>PRO</Text></View>
               : <TouchableOpacity onPress={() => router.push('/paywall')} style={styles.upgradeBtn}>
                   <Text style={styles.upgradeBtnText}>Upgrade</Text>
