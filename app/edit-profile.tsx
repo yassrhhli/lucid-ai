@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/hooks/useAuth';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 
 export default function EditProfileScreen() {
   const { user, profile, updateProfile } = useAuth();
@@ -34,11 +35,23 @@ export default function EditProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} accessibilityLabel="Go back" accessibilityRole="button">
+        <TouchableOpacity
+          onPress={() => { haptics.light(); router.back(); }}
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
           <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
         </TouchableOpacity>
         <Text style={styles.title}>Edit Profile</Text>
-        <TouchableOpacity onPress={handleSave} disabled={isSaving}>
+        <TouchableOpacity
+          onPress={() => { haptics.light(); handleSave(); }}
+          disabled={isSaving}
+          accessibilityLabel="Save profile changes"
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isSaving }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
           {isSaving
             ? <ActivityIndicator size="small" color={COLORS.primary} />
             : <Text style={styles.saveBtn}>Save</Text>
@@ -91,7 +104,12 @@ export default function EditProfileScreen() {
             <Text style={styles.fieldValue}>{profile?.is_pro ? 'Lucid Pro' : 'Free'}</Text>
             {profile?.is_pro
               ? <View style={styles.proBadge}><Text style={styles.proBadgeText}>PRO</Text></View>
-              : <TouchableOpacity onPress={() => router.push('/paywall')} style={styles.upgradeBtn}>
+              : <TouchableOpacity
+                  onPress={() => { haptics.light(); router.push('/paywall'); }}
+                  style={styles.upgradeBtn}
+                  accessibilityLabel="Upgrade to Lucid Pro"
+                  accessibilityRole="button"
+                >
                   <Text style={styles.upgradeBtnText}>Upgrade</Text>
                 </TouchableOpacity>
             }

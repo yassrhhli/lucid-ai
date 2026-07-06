@@ -140,7 +140,12 @@ export default function JournalScreen() {
               : 'Start recording your dreams each morning while the memory is fresh'}
           </Text>
           {!search && (
-            <TouchableOpacity onPress={() => router.push('/dream/new')} style={styles.emptyBtn}>
+            <TouchableOpacity
+              onPress={() => { haptics.light(); router.push('/dream/new'); }}
+              style={styles.emptyBtn}
+              accessibilityLabel="Record your first dream"
+              accessibilityRole="button"
+            >
               <LinearGradient colors={['#6B46C1', '#8B5CF6']} style={styles.emptyBtnGrad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
                 <Ionicons name="add" size={16} color="#fff" />
                 <Text style={styles.emptyBtnText}>Record First Dream</Text>

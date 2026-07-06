@@ -10,6 +10,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { InterpretationCard } from '@/components/dream/InterpretationCard';
 import { supabase } from '@/services/supabase';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 import type { Dream } from '@/types/dream';
 
 const QUALITY_LABEL: Record<number, string> = {
@@ -63,15 +64,25 @@ export default function DreamDetailScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} accessibilityLabel="Go back" accessibilityRole="button">
+        <TouchableOpacity onPress={() => { haptics.light(); router.back(); }} style={styles.backBtn} accessibilityLabel="Go back" accessibilityRole="button">
           <Ionicons name="arrow-back" size={22} color={COLORS.primary} />
         </TouchableOpacity>
         <View style={styles.headerActions}>
-          <TouchableOpacity onPress={() => Share.share({ message: dream.content.slice(0, 280) + '...\n\n— LUCID.AI' })} style={styles.headerBtn}>
+          <TouchableOpacity
+            onPress={() => { haptics.light(); Share.share({ message: dream.content.slice(0, 280) + '...\n\n— LUCID.AI' }); }}
+            style={styles.headerBtn}
+            accessibilityLabel="Share dream"
+            accessibilityRole="button"
+          >
             <Ionicons name="share-outline" size={20} color={COLORS.primary} />
           </TouchableOpacity>
           {isOwnDream && (
-            <TouchableOpacity onPress={() => router.push(`/dream/edit/${dream.id}`)} style={styles.headerBtn}>
+            <TouchableOpacity
+              onPress={() => { haptics.light(); router.push(`/dream/edit/${dream.id}`); }}
+              style={styles.headerBtn}
+              accessibilityLabel="Edit dream"
+              accessibilityRole="button"
+            >
               <Ionicons name="create-outline" size={20} color={COLORS.primary} />
             </TouchableOpacity>
           )}
@@ -197,7 +208,14 @@ export default function DreamDetailScreen() {
         )}
 
         {isOwnDream && (
-          <TouchableOpacity onPress={handleDelete} style={styles.deleteBtn} disabled={isDeleting}>
+          <TouchableOpacity
+            onPress={() => { haptics.warning(); handleDelete(); }}
+            style={styles.deleteBtn}
+            disabled={isDeleting}
+            accessibilityLabel="Delete this dream"
+            accessibilityRole="button"
+          >
+            <Ionicons name="trash-outline" size={15} color={COLORS.error} />
             <Text style={styles.deleteText}>{isDeleting ? 'Deleting...' : 'Delete Dream'}</Text>
           </TouchableOpacity>
         )}
@@ -211,10 +229,10 @@ export default function DreamDetailScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderBottomWidth: 1, borderBottomColor: COLORS.border },
-  backBtn: { padding: SPACING.xs },
+  backBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   backText: { color: COLORS.primary, fontSize: FONT_SIZES.md, fontWeight: '500', padding: SPACING.xs },
-  headerActions: { flexDirection: 'row', gap: SPACING.md },
-  headerBtn: { padding: SPACING.xs },
+  headerActions: { flexDirection: 'row', gap: SPACING.xs },
+  headerBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   actionText: { color: COLORS.primary, fontSize: FONT_SIZES.sm, fontWeight: '500', padding: SPACING.xs },
   scroll: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg },
   heroGradient: { borderRadius: RADIUS.lg, padding: SPACING.md, marginBottom: SPACING.md },
@@ -252,6 +270,6 @@ const styles = StyleSheet.create({
   affirmationCard: { backgroundColor: COLORS.primary + '11', borderRadius: RADIUS.lg, padding: SPACING.lg, borderWidth: 1, borderColor: COLORS.primary + '33', alignItems: 'center', gap: SPACING.sm },
   affirmationLabel: { fontSize: FONT_SIZES.xs, color: COLORS.primary, letterSpacing: 2, textTransform: 'uppercase', fontWeight: '600' },
   affirmation: { fontSize: FONT_SIZES.lg, color: COLORS.text, fontStyle: 'italic', textAlign: 'center', lineHeight: 28 },
-  deleteBtn: { marginTop: SPACING.xl, alignItems: 'center', padding: SPACING.md },
+  deleteBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: SPACING.xl, padding: SPACING.md },
   deleteText: { color: COLORS.error, fontSize: FONT_SIZES.sm, fontWeight: '500' },
 });

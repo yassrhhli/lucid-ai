@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/Button';
 import { requestNotificationPermission, scheduleDreamReminder } from '@/utils/notifications';
 import { analytics, EVENTS } from '@/utils/analytics';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 
 const { width } = Dimensions.get('window');
 
@@ -152,7 +153,12 @@ export default function OnboardingScreen() {
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       {/* Skip button */}
       {!isLast && (
-        <TouchableOpacity onPress={handleSkip} style={styles.skipBtn}>
+        <TouchableOpacity
+          onPress={() => { haptics.light(); handleSkip(); }}
+          style={styles.skipBtn}
+          accessibilityLabel="Skip onboarding"
+          accessibilityRole="button"
+        >
           <Text style={styles.skipText}>Skip</Text>
         </TouchableOpacity>
       )}
@@ -199,7 +205,12 @@ export default function OnboardingScreen() {
           variant={isLast ? 'primary' : 'primary'}
         />
         {isLast && (
-          <TouchableOpacity onPress={handleFinish} style={styles.noThanksBtn}>
+          <TouchableOpacity
+            onPress={() => { haptics.light(); handleFinish(); }}
+            style={styles.noThanksBtn}
+            accessibilityLabel="Skip notifications"
+            accessibilityRole="button"
+          >
             <Text style={styles.noThanksText}>No thanks, skip notifications</Text>
           </TouchableOpacity>
         )}

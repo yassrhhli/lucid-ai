@@ -227,8 +227,15 @@ export default function NewDreamScreen() {
             {tags.filter(t => !SUGGESTED_TAGS.includes(t)).length > 0 && (
               <View style={styles.customTagsRow}>
                 {tags.filter(t => !SUGGESTED_TAGS.includes(t)).map(tag => (
-                  <TouchableOpacity key={tag} onPress={() => toggleTag(tag)} style={styles.tagChipSelected}>
-                    <Text style={styles.tagChipTextSelected}>#{tag} ✕</Text>
+                  <TouchableOpacity
+                    key={tag}
+                    onPress={() => toggleTag(tag)}
+                    style={[styles.tagChipSelected, styles.customTagChip]}
+                    accessibilityLabel={`Remove tag ${tag}`}
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.tagChipTextSelected}>#{tag}</Text>
+                    <Ionicons name="close" size={11} color={COLORS.accentSoft} />
                   </TouchableOpacity>
                 ))}
               </View>
@@ -355,6 +362,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   customTagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.xs },
+  customTagChip: { flexDirection: 'row', alignItems: 'center', gap: 5 },
 
   // Toggles
   togglesCard: { backgroundColor: COLORS.surface, borderRadius: RADIUS.xl, borderWidth: 1, borderColor: COLORS.borderSubtle, overflow: 'hidden' },

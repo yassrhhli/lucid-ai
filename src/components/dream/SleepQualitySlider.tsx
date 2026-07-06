@@ -3,6 +3,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import type { SleepQuality } from '@/types/dream';
 import { COLORS, FONT_SIZES, RADIUS, SPACING } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 
 const QUALITY_CONFIG: Record<SleepQuality, { label: string; icon: string; color: string }> = {
   1: { label: 'Terrible', icon: 'sad-outline',         color: '#ef4444' },
@@ -37,7 +38,7 @@ export function SleepQualitySlider({ value, onChange }: SleepQualitySliderProps)
           return (
             <TouchableOpacity
               key={v}
-              onPress={() => onChange(v)}
+              onPress={() => { haptics.selection(); onChange(v); }}
               activeOpacity={0.7}
               style={[
                 styles.button,
@@ -46,6 +47,9 @@ export function SleepQualitySlider({ value, onChange }: SleepQualitySliderProps)
                   borderColor: config.color,
                 },
               ]}
+              accessibilityLabel={`Sleep quality: ${config.label}`}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: isSelected }}
             >
               <Ionicons name={config.icon as any} size={20} color={isSelected ? '#fff' : config.color} />
               <Text
@@ -94,7 +98,6 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     gap: 4,
   },
-  emoji: { fontSize: 20 },
   num: {
     fontSize: FONT_SIZES.xs,
     color: COLORS.textMuted,

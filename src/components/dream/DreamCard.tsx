@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { format } from 'date-fns';
 import type { Dream } from '@/types/dream';
 import { COLORS, FONT_SIZES, RADIUS, SPACING } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 
 const EMOTION_META: Record<string, { name: string; color: string }> = {
   joy:        { name: 'sunny',        color: '#FBBF24' },
@@ -64,7 +65,8 @@ export function DreamCard({ dream, onLongPress }: DreamCardProps) {
             )}
             {hasInterpretation && (
               <View style={styles.aiPill}>
-                <Text style={styles.aiPillText}>✦ AI</Text>
+                <Ionicons name="sparkles" size={8} color={COLORS.accent} />
+                <Text style={styles.aiPillText}>AI</Text>
               </View>
             )}
           </View>
@@ -109,7 +111,7 @@ export function DreamCard({ dream, onLongPress }: DreamCardProps) {
           )}
 
           <TouchableOpacity
-            onPress={() => onLongPress?.(dream)}
+            onPress={() => { haptics.light(); onLongPress?.(dream); }}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             style={styles.moreBtn}
             accessibilityLabel="More options"
@@ -142,7 +144,7 @@ const styles = StyleSheet.create({
   pillsRow: { flexDirection: 'row', gap: 5 },
   lucidPill: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: 'rgba(167,139,250,0.14)', borderRadius: RADIUS.full, paddingHorizontal: 7, paddingVertical: 3, borderWidth: 1, borderColor: 'rgba(167,139,250,0.25)' },
   recurPill: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: COLORS.goldGlow, borderRadius: RADIUS.full, paddingHorizontal: 7, paddingVertical: 3, borderWidth: 1, borderColor: 'rgba(233,184,74,0.25)' },
-  aiPill:    { backgroundColor: COLORS.primaryGlow, borderRadius: RADIUS.full, paddingHorizontal: 7, paddingVertical: 3, borderWidth: 1, borderColor: COLORS.borderBright },
+  aiPill:    { flexDirection: 'row', alignItems: 'center', gap: 2, backgroundColor: COLORS.primaryGlow, borderRadius: RADIUS.full, paddingHorizontal: 7, paddingVertical: 3, borderWidth: 1, borderColor: COLORS.borderBright },
   pillText:  { fontSize: 10, fontWeight: '600' },
   aiPillText:{ fontSize: 10, fontWeight: '700', color: COLORS.accent },
 

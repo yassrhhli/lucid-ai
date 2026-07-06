@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { showErrorAlert } from '@/utils/errorHandler';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 
 const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -74,7 +75,9 @@ export default function RegisterScreen() {
           style={StyleSheet.absoluteFillObject}
         />
         <View style={styles.confirmContainer}>
-          <Text style={styles.confirmEmoji}>📧</Text>
+          <View style={styles.confirmIconWrap}>
+            <Ionicons name="mail" size={40} color={COLORS.accent} />
+          </View>
           <Text style={styles.confirmTitle}>Check your email</Text>
           <Text style={styles.confirmText}>
             We sent a confirmation link to{'\n'}
@@ -110,7 +113,9 @@ export default function RegisterScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.logo}>✨</Text>
+          <LinearGradient colors={['#4A2D8A', '#7B5EA7']} style={styles.logoIcon} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+            <Ionicons name="sparkles" size={30} color="#fff" />
+          </LinearGradient>
           <Text style={styles.title}>Start your journey</Text>
           <Text style={styles.subtitle}>
             Join 10,000+ dreamers unlocking their subconscious
@@ -182,12 +187,15 @@ export default function RegisterScreen() {
               'AI-powered dream interpretations',
               'Track patterns & recurring themes',
               'Daily dream insights & affirmations',
-              '💜 3 free interpretations per week',
             ].map((benefit) => (
               <Text key={benefit} style={styles.benefitItem}>
                 {benefit}
               </Text>
             ))}
+            <View style={styles.benefitHighlightRow}>
+              <Ionicons name="heart" size={13} color={COLORS.accent} />
+              <Text style={styles.benefitHighlightText}>3 free interpretations per week</Text>
+            </View>
           </View>
 
           <Button
@@ -208,7 +216,7 @@ export default function RegisterScreen() {
         <View style={styles.footer}>
           <Text style={styles.footerText}>Already have an account? </Text>
           <Link href="/(auth)/login" asChild>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => haptics.light()} accessibilityLabel="Sign in" accessibilityRole="button">
               <Text style={styles.footerLink}>Sign in</Text>
             </TouchableOpacity>
           </Link>
@@ -233,9 +241,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: SPACING.xl,
   },
-  logo: {
-    fontSize: 56,
+  logoIcon: {
+    width: 72, height: 72, borderRadius: 22,
+    alignItems: 'center', justifyContent: 'center',
     marginBottom: SPACING.sm,
+    shadowColor: '#7B5EA7', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.5, shadowRadius: 18, elevation: 10,
   },
   title: {
     fontSize: FONT_SIZES['2xl'],
@@ -265,6 +275,15 @@ const styles = StyleSheet.create({
   benefitItem: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.textSecondary,
+    lineHeight: 20,
+  },
+  benefitHighlightRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2,
+  },
+  benefitHighlightText: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.accent,
+    fontWeight: '600',
     lineHeight: 20,
   },
   terms: {
@@ -298,8 +317,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: SPACING.xl,
   },
-  confirmEmoji: {
-    fontSize: 64,
+  confirmIconWrap: {
+    width: 88, height: 88, borderRadius: 26,
+    backgroundColor: COLORS.primaryGlow, borderWidth: 1, borderColor: COLORS.borderBright,
+    alignItems: 'center', justifyContent: 'center',
     marginBottom: SPACING.lg,
   },
   confirmTitle: {

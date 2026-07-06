@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 import { supabase } from '@/services/supabase';
 
 export default function PrivacyScreen() {
@@ -55,7 +56,12 @@ export default function PrivacyScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} accessibilityLabel="Go back" accessibilityRole="button">
+        <TouchableOpacity
+          onPress={() => { haptics.light(); router.back(); }}
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
           <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
         </TouchableOpacity>
         <Text style={styles.title}>Privacy & Data</Text>
@@ -76,18 +82,33 @@ export default function PrivacyScreen() {
         ))}
 
         <View style={styles.linksCard}>
-          <TouchableOpacity style={styles.linkRow} onPress={() => Linking.openURL('https://lucidai.app/privacy')}>
+          <TouchableOpacity
+            style={styles.linkRow}
+            onPress={() => { haptics.light(); Linking.openURL('https://lucidai.app/privacy'); }}
+            accessibilityLabel="Open Privacy Policy"
+            accessibilityRole="button"
+          >
             <Text style={styles.linkText}>Privacy Policy</Text>
             <Ionicons name="open-outline" size={16} color={COLORS.primary} />
           </TouchableOpacity>
           <View style={styles.divider} />
-          <TouchableOpacity style={styles.linkRow} onPress={() => Linking.openURL('https://lucidai.app/terms')}>
+          <TouchableOpacity
+            style={styles.linkRow}
+            onPress={() => { haptics.light(); Linking.openURL('https://lucidai.app/terms'); }}
+            accessibilityLabel="Open Terms of Service"
+            accessibilityRole="button"
+          >
             <Text style={styles.linkText}>Terms of Service</Text>
             <Ionicons name="open-outline" size={16} color={COLORS.primary} />
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.deleteBtn} onPress={handleDeleteData}>
+        <TouchableOpacity
+          style={styles.deleteBtn}
+          onPress={() => { haptics.warning(); handleDeleteData(); }}
+          accessibilityLabel="Delete all my data"
+          accessibilityRole="button"
+        >
           <Ionicons name="trash-outline" size={18} color={COLORS.error} />
           <Text style={styles.deleteText}>Delete All My Data</Text>
         </TouchableOpacity>

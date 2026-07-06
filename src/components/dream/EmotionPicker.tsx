@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import type { Emotion } from '@/types/dream';
 import { COLORS, FONT_SIZES, RADIUS, SPACING } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 
 const EMOTIONS: { key: Emotion; label: string; icon: string; color: string }[] = [
   { key: 'joy',        label: 'Joy',      icon: 'sunny',        color: '#fbbf24' },
@@ -31,6 +32,7 @@ interface EmotionPickerProps {
 
 export function EmotionPicker({ selected, onChange, max = 3 }: EmotionPickerProps) {
   const toggle = (emotion: Emotion) => {
+    haptics.selection();
     if (selected.includes(emotion)) {
       onChange(selected.filter((e) => e !== emotion));
     } else if (selected.length < max) {
@@ -56,6 +58,9 @@ export function EmotionPicker({ selected, onChange, max = 3 }: EmotionPickerProp
                 styles.chip,
                 isSelected && { backgroundColor: color + '22', borderColor: color },
               ]}
+              accessibilityLabel={label}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: isSelected }}
             >
               <Ionicons name={icon as any} size={14} color={isSelected ? '#fff' : color} />
               <Text
@@ -107,7 +112,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
   },
-  emoji: { fontSize: 14 },
   chipLabel: {
     fontSize: FONT_SIZES.xs,
     color: COLORS.textSecondary,

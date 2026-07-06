@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { BannerAdComponent } from '@/components/ads/BannerAd';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 import { logger } from '@/utils/errorHandler';
 import type { FeedPost } from '@/types/dream';
 
@@ -116,6 +117,8 @@ export default function ExploreScreen() {
           style={styles.card}
           activeOpacity={0.8}
           onPress={() => router.push(`/dream/${item.dream_id}`)}
+          accessibilityLabel={`Open shared dream${item.dream?.title ? `: ${item.dream.title}` : ''}`}
+          accessibilityRole="button"
         >
           <View style={styles.cardHeader}>
             <View style={styles.avatar}>
@@ -152,10 +155,12 @@ export default function ExploreScreen() {
 
           <View style={styles.cardFooter}>
             <TouchableOpacity
-              onPress={() => handleVote(item)}
+              onPress={() => { haptics.light(); handleVote(item); }}
               style={[styles.voteBtn, hasVoted && styles.voteBtnActive]}
               activeOpacity={0.7}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityLabel={hasVoted ? 'Remove like' : 'Like this dream'}
+              accessibilityRole="button"
             >
               <Ionicons
                 name={hasVoted ? 'heart' : 'heart-outline'}

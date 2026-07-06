@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 
 const SYMBOLS = [
   { symbol: 'Flying', meaning: 'Desire for freedom, escape from constraints, ambition or fear of failure.', category: 'Action' },
@@ -44,7 +45,12 @@ export default function DictionaryScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} accessibilityLabel="Go back" accessibilityRole="button">
+        <TouchableOpacity
+          onPress={() => { haptics.light(); router.back(); }}
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
           <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
         </TouchableOpacity>
         <Text style={styles.title}>Dream Dictionary</Text>
@@ -59,15 +65,30 @@ export default function DictionaryScreen() {
           placeholderTextColor={COLORS.textSecondary}
           value={search}
           onChangeText={setSearch}
+          accessibilityLabel="Search dream symbols"
         />
-        {search ? <TouchableOpacity onPress={() => setSearch('')}>
-          <Ionicons name="close-circle" size={16} color={COLORS.textSecondary} />
-        </TouchableOpacity> : null}
+        {search ? (
+          <TouchableOpacity
+            onPress={() => { haptics.light(); setSearch(''); }}
+            accessibilityLabel="Clear search"
+            accessibilityRole="button"
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="close-circle" size={16} color={COLORS.textSecondary} />
+          </TouchableOpacity>
+        ) : null}
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categories} contentContainerStyle={{ paddingHorizontal: SPACING.md, gap: 8 }}>
         {CATEGORIES.map(cat => (
-          <TouchableOpacity key={cat} onPress={() => setCategory(cat)} style={[styles.catChip, category === cat && styles.catChipActive]}>
+          <TouchableOpacity
+            key={cat}
+            onPress={() => { haptics.selection(); setCategory(cat); }}
+            style={[styles.catChip, category === cat && styles.catChipActive]}
+            accessibilityLabel={`Filter by ${cat}`}
+            accessibilityRole="button"
+            accessibilityState={{ selected: category === cat }}
+          >
             <Text style={[styles.catLabel, category === cat && styles.catLabelActive]}>{cat}</Text>
           </TouchableOpacity>
         ))}

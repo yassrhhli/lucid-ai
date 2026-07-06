@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { showErrorAlert } from '@/utils/errorHandler';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 
 const loginSchema = z.object({
   email:    z.string().email('Invalid email address'),
@@ -95,7 +96,12 @@ export default function LoginScreen() {
           </View>
 
           <Link href="/(auth)/forgot-password" asChild>
-            <TouchableOpacity style={styles.forgotLink}>
+            <TouchableOpacity
+              style={styles.forgotLink}
+              onPress={() => haptics.light()}
+              accessibilityLabel="Forgot password"
+              accessibilityRole="button"
+            >
               <Text style={styles.forgotText}>Forgot password?</Text>
             </TouchableOpacity>
           </Link>
@@ -112,12 +118,24 @@ export default function LoginScreen() {
           {/* Social */}
           <View style={styles.socialRow}>
             {Platform.OS === 'ios' && (
-              <TouchableOpacity style={styles.socialBtn} onPress={signInWithApple} activeOpacity={0.8}>
+              <TouchableOpacity
+                style={styles.socialBtn}
+                onPress={() => { haptics.light(); signInWithApple(); }}
+                activeOpacity={0.8}
+                accessibilityLabel="Sign in with Apple"
+                accessibilityRole="button"
+              >
                 <Ionicons name="logo-apple" size={18} color={COLORS.text} />
                 <Text style={styles.socialBtnText}>Apple</Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity style={styles.socialBtn} onPress={signInWithGoogle} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={styles.socialBtn}
+              onPress={() => { haptics.light(); signInWithGoogle(); }}
+              activeOpacity={0.8}
+              accessibilityLabel="Sign in with Google"
+              accessibilityRole="button"
+            >
               <Ionicons name="logo-google" size={16} color={COLORS.text} />
               <Text style={styles.socialBtnText}>Google</Text>
             </TouchableOpacity>
@@ -128,7 +146,7 @@ export default function LoginScreen() {
         <View style={styles.footer}>
           <Text style={styles.footerText}>Don't have an account? </Text>
           <Link href="/(auth)/register" asChild>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => haptics.light()} accessibilityLabel="Sign up for free" accessibilityRole="button">
               <Text style={styles.footerLink}>Sign up free</Text>
             </TouchableOpacity>
           </Link>

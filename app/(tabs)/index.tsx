@@ -48,7 +48,13 @@ export default function HomeScreen() {
             <Text style={styles.username}>{username}</Text>
             <Text style={styles.dateLabel}>{format(now, 'EEEE, MMMM d')}</Text>
           </View>
-          <TouchableOpacity style={styles.streakBadge} onPress={() => router.push('/(tabs)/patterns')}>
+          <TouchableOpacity
+            style={styles.streakBadge}
+            onPress={() => { haptics.light(); router.push('/(tabs)/patterns'); }}
+            accessibilityLabel={`${streak} day streak, view patterns`}
+            accessibilityRole="button"
+            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+          >
             <Ionicons name="flame" size={15} color="#F97316" />
             <Text style={styles.streakNum}>{streak}</Text>
             <Text style={styles.streakLabel}>day</Text>
@@ -108,7 +114,14 @@ export default function HomeScreen() {
         <Text style={styles.sectionLabel}>QUICK ACCESS</Text>
         <View style={styles.quickGrid}>
           {QUICK_ACTIONS.map(action => (
-            <TouchableOpacity key={action.label} style={styles.quickCard} onPress={() => router.push(action.route as any)} activeOpacity={0.75}>
+            <TouchableOpacity
+              key={action.label}
+              style={styles.quickCard}
+              onPress={() => { haptics.light(); router.push(action.route as any); }}
+              activeOpacity={0.75}
+              accessibilityLabel={action.label}
+              accessibilityRole="button"
+            >
               <View style={[styles.quickIcon, { backgroundColor: action.bg }]}>
                 <Ionicons name={action.icon} size={20} color={action.color} />
               </View>
@@ -148,12 +161,24 @@ export default function HomeScreen() {
           <>
             <View style={styles.recentHeader}>
               <Text style={styles.sectionLabel}>RECENT</Text>
-              <TouchableOpacity onPress={() => router.push('/(tabs)/journal')}>
+              <TouchableOpacity
+                onPress={() => { haptics.light(); router.push('/(tabs)/journal'); }}
+                accessibilityLabel="See all dreams"
+                accessibilityRole="button"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
                 <Text style={styles.seeAll}>See all</Text>
               </TouchableOpacity>
             </View>
             {dreams.slice(0, 2).map(dream => (
-              <TouchableOpacity key={dream.id} onPress={() => router.push(`/dream/${dream.id}`)} activeOpacity={0.78} style={styles.recentCard}>
+              <TouchableOpacity
+                key={dream.id}
+                onPress={() => { haptics.light(); router.push(`/dream/${dream.id}`); }}
+                activeOpacity={0.78}
+                style={styles.recentCard}
+                accessibilityLabel={`Open dream: ${dream.title || 'Untitled Dream'}`}
+                accessibilityRole="button"
+              >
                 <View style={[styles.recentQualityBar, { backgroundColor: dream.sleep_quality ? ['#F87171','#FB923C','#FBBF24','#34D399','#8B5CF6'][dream.sleep_quality - 1] : COLORS.border }]} />
                 <View style={styles.recentContent}>
                   <Text style={styles.recentTitle} numberOfLines={1}>{dream.title || 'Untitled Dream'}</Text>
@@ -161,7 +186,12 @@ export default function HomeScreen() {
                   <View style={styles.recentFooter}>
                     <Text style={styles.recentDate}>{format(new Date(dream.dream_date + 'T12:00:00'), 'MMM d')}</Text>
                     {dream.is_lucid && <View style={styles.lucidPill}><Text style={styles.lucidPillText}>Lucid</Text></View>}
-                    {dream.interpretation && <View style={styles.aiPill}><Text style={styles.aiPillText}>AI ✦</Text></View>}
+                    {dream.interpretation && (
+                      <View style={styles.aiPill}>
+                        <Ionicons name="sparkles" size={9} color={COLORS.accent} />
+                        <Text style={styles.aiPillText}>AI</Text>
+                      </View>
+                    )}
                   </View>
                 </View>
                 <Ionicons name="chevron-forward" size={14} color={COLORS.textMuted} style={{ alignSelf: 'center' }} />
@@ -199,6 +229,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: 'rgba(249,115,22,0.1)',
     borderRadius: RADIUS.full, paddingHorizontal: 14, paddingVertical: 8,
+    minHeight: 44,
     borderWidth: 1, borderColor: 'rgba(249,115,22,0.22)',
     marginTop: 4,
   },
@@ -292,6 +323,6 @@ const styles = StyleSheet.create({
   recentDate: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted },
   lucidPill: { backgroundColor: 'rgba(139,92,246,0.18)', borderRadius: RADIUS.full, paddingHorizontal: 8, paddingVertical: 2 },
   lucidPillText: { fontSize: 10, color: '#A78BFA', fontWeight: '600' },
-  aiPill: { backgroundColor: COLORS.primaryGlow, borderRadius: RADIUS.full, paddingHorizontal: 8, paddingVertical: 2 },
+  aiPill: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: COLORS.primaryGlow, borderRadius: RADIUS.full, paddingHorizontal: 8, paddingVertical: 2 },
   aiPillText: { fontSize: 10, color: COLORS.accent, fontWeight: '600' },
 });

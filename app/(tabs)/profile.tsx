@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/hooks/useAuth';
 import { useDreams } from '@/hooks/useDreams';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 
 const MENU_SECTIONS = [
   {
@@ -82,7 +83,12 @@ export default function ProfileScreen() {
                 )}
               </View>
               <Text style={styles.email}>{user?.email}</Text>
-              <TouchableOpacity style={styles.editBtn} onPress={() => router.push('/edit-profile')}>
+              <TouchableOpacity
+                style={styles.editBtn}
+                onPress={() => { haptics.light(); router.push('/edit-profile'); }}
+                accessibilityLabel="Edit profile"
+                accessibilityRole="button"
+              >
                 <Ionicons name="create-outline" size={13} color={COLORS.primaryBright} />
                 <Text style={styles.editBtnText}>Edit profile</Text>
               </TouchableOpacity>
@@ -110,7 +116,13 @@ export default function ProfileScreen() {
 
         {/* ── Pro upsell ─────────────────────────────────────────────── */}
         {!isPro && (
-          <TouchableOpacity onPress={() => router.push('/paywall')} activeOpacity={0.88} style={styles.upsellShadow}>
+          <TouchableOpacity
+            onPress={() => { haptics.light(); router.push('/paywall'); }}
+            activeOpacity={0.88}
+            style={styles.upsellShadow}
+            accessibilityLabel="Upgrade to Lucid Pro"
+            accessibilityRole="button"
+          >
             <LinearGradient colors={['#1A0D3A', '#2D1460', '#1A0D3A']} style={styles.upsell} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
               <View style={styles.upsellIconWrap}>
                 <Ionicons name="star" size={20} color={COLORS.gold} />
@@ -134,9 +146,11 @@ export default function ProfileScreen() {
               {section.items.map(({ icon, label, onPress }, idx) => (
                 <TouchableOpacity
                   key={label}
-                  onPress={() => onPress(router)}
+                  onPress={() => { haptics.light(); onPress(router); }}
                   style={[styles.menuItem, idx < section.items.length - 1 && styles.menuItemBorder]}
                   activeOpacity={0.7}
+                  accessibilityLabel={label}
+                  accessibilityRole="button"
                 >
                   <View style={styles.menuItemIcon}>
                     <Ionicons name={icon as any} size={17} color={COLORS.textSecondary} />
@@ -150,7 +164,13 @@ export default function ProfileScreen() {
         ))}
 
         {/* ── Sign out ───────────────────────────────────────────────── */}
-        <TouchableOpacity onPress={handleSignOut} style={styles.signOutBtn} activeOpacity={0.7}>
+        <TouchableOpacity
+          onPress={() => { haptics.warning(); handleSignOut(); }}
+          style={styles.signOutBtn}
+          activeOpacity={0.7}
+          accessibilityLabel="Sign out"
+          accessibilityRole="button"
+        >
           <View style={styles.menuCard}>
             <View style={styles.menuItem}>
               <View style={[styles.menuItemIcon, { backgroundColor: 'rgba(245,101,101,0.12)' }]}>

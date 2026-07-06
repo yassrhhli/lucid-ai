@@ -14,6 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAds } from '@/hooks/useAds';
 import { Button } from '@/components/ui/Button';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 import type { Dream } from '@/types/dream';
 
 interface InterpretationCardProps {
@@ -64,11 +65,14 @@ export function InterpretationCard({ dream, onSuccess }: InterpretationCardProps
           />
 
           <TouchableOpacity
-            onPress={handleWatchAd}
+            onPress={() => { haptics.light(); handleWatchAd(); }}
             style={styles.rewardedBtn}
+            accessibilityLabel="Watch an ad for one free interpretation"
+            accessibilityRole="button"
           >
+            <Ionicons name="play-circle-outline" size={16} color={COLORS.textSecondary} />
             <Text style={styles.rewardedText}>
-              📺 Watch an ad for 1 free interpretation
+              Watch an ad for 1 free interpretation
             </Text>
           </TouchableOpacity>
         </View>
@@ -163,7 +167,13 @@ export function InterpretationCard({ dream, onSuccess }: InterpretationCardProps
             fullWidth
             size="lg"
           />
-          <TouchableOpacity style={styles.rewardedBtn} onPress={handleWatchAd}>
+          <TouchableOpacity
+            style={styles.rewardedBtn}
+            onPress={() => { haptics.light(); handleWatchAd(); }}
+            accessibilityLabel="Watch an ad for one free interpretation"
+            accessibilityRole="button"
+          >
+            <Ionicons name="play-circle-outline" size={16} color={COLORS.textSecondary} />
             <Text style={styles.rewardedText}>Watch ad for 1 free interpretation</Text>
           </TouchableOpacity>
         </View>
@@ -190,7 +200,6 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
   ctaHeader: { flexDirection: 'row', gap: SPACING.md, alignItems: 'flex-start' },
-  ctaEmoji: { fontSize: 36 },
   ctaTexts: { flex: 1 },
   ctaTitle: { fontSize: FONT_SIZES.lg, fontWeight: '700', color: COLORS.text },
   ctaSub: { fontSize: FONT_SIZES.sm, color: COLORS.textMuted, marginTop: 2, lineHeight: 18 },
@@ -202,7 +211,7 @@ const styles = StyleSheet.create({
   quotaLabel: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted, flex: 1 },
   noQuotaActions: { gap: SPACING.sm },
   rewardedBtn: {
-    alignItems: 'center',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
     padding: SPACING.sm,
     borderRadius: RADIUS.md,
     borderWidth: 1,
@@ -232,7 +241,6 @@ const styles = StyleSheet.create({
     borderColor: COLORS.error + '44',
     gap: SPACING.sm,
   },
-  errorEmoji: { fontSize: 40 },
   errorTitle: { fontSize: FONT_SIZES.lg, fontWeight: '700', color: COLORS.text },
   errorText: { fontSize: FONT_SIZES.sm, color: COLORS.error, textAlign: 'center' },
   quotaCard: {
@@ -244,7 +252,6 @@ const styles = StyleSheet.create({
     borderColor: COLORS.gold + '44',
     gap: SPACING.md,
   },
-  quotaEmoji: { fontSize: 40 },
   quotaTitle: { fontSize: FONT_SIZES.xl, fontWeight: '800', color: COLORS.text },
   quotaSub: { fontSize: FONT_SIZES.sm, color: COLORS.textMuted, textAlign: 'center', lineHeight: 20 },
   quotaOptions: { width: '100%', gap: SPACING.sm },

@@ -183,7 +183,14 @@ export default function PaywallScreen() {
         </TouchableOpacity>
 
         {/* Restore */}
-        <TouchableOpacity onPress={handleRestore} disabled={isRestoring} style={styles.restoreBtn}>
+        <TouchableOpacity
+          onPress={() => { haptics.light(); handleRestore(); }}
+          disabled={isRestoring}
+          style={styles.restoreBtn}
+          accessibilityLabel="Restore purchases"
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isRestoring }}
+        >
           {isRestoring
             ? <ActivityIndicator size="small" color={COLORS.textMuted} />
             : <Text style={styles.restoreText}>Restore Purchases</Text>}
@@ -191,8 +198,15 @@ export default function PaywallScreen() {
 
         {/* Trust row */}
         <View style={styles.trustRow}>
-          {['🔒 Secure', '✦ No Ads', '↩ Cancel Anytime'].map(t => (
-            <Text key={t} style={styles.trustItem}>{t}</Text>
+          {[
+            { icon: 'shield-checkmark-outline' as const, label: 'Secure' },
+            { icon: 'ban-outline' as const,               label: 'No Ads' },
+            { icon: 'arrow-undo-outline' as const,        label: 'Cancel Anytime' },
+          ].map(t => (
+            <View key={t.label} style={styles.trustItemRow}>
+              <Ionicons name={t.icon} size={12} color={COLORS.textMuted} />
+              <Text style={styles.trustItem}>{t.label}</Text>
+            </View>
           ))}
         </View>
 
@@ -270,6 +284,7 @@ const styles = StyleSheet.create({
   restoreText: { color: COLORS.textMuted, fontSize: FONT_SIZES.sm },
 
   trustRow: { flexDirection: 'row', justifyContent: 'center', gap: SPACING.lg, marginBottom: SPACING.md },
+  trustItemRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   trustItem: { fontSize: FONT_SIZES.xs, color: COLORS.textMuted },
 
   legal: { fontSize: 11, color: COLORS.textMuted, textAlign: 'center', lineHeight: 17, paddingHorizontal: SPACING.lg },

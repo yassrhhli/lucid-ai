@@ -140,6 +140,38 @@ export default function PatternsScreen() {
     );
   }
 
+  // ── Insufficient data (Pro user, 0 dreams yet) ───────────────────
+  if (!stats) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <StatusBar barStyle="light-content" />
+        <View style={styles.glow} pointerEvents="none" />
+        <View style={styles.insufficientWrap}>
+          <View style={styles.insufficientIconOuter}>
+            <View style={styles.insufficientIconInner}>
+              <Ionicons name="bar-chart-outline" size={36} color={COLORS.accent} />
+            </View>
+          </View>
+          <Text style={styles.insufficientTitle}>Not enough data yet</Text>
+          <Text style={styles.insufficientSub}>
+            Record a few dreams and your emotional patterns, recurring themes, and archetypes will appear here.
+          </Text>
+          <TouchableOpacity
+            onPress={() => { haptics.light(); router.push('/dream/new'); }}
+            style={styles.insufficientBtn}
+            accessibilityLabel="Record your first dream"
+            accessibilityRole="button"
+          >
+            <LinearGradient colors={['#6B46C1', '#8B5CF6']} style={styles.insufficientBtnGrad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+              <Ionicons name="add" size={16} color="#fff" />
+              <Text style={styles.insufficientBtnText}>Record a Dream</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   // ── Full patterns view ───────────────────────────────────────────
   const maxEmotion = stats.topEmotions[0]?.[1] ?? 1;
 
@@ -398,4 +430,29 @@ const styles = StyleSheet.create({
   sleepBig: { fontSize: FONT_SIZES['4xl'], fontWeight: '800', color: COLORS.gold },
   sleepDen: { fontSize: FONT_SIZES.lg, color: COLORS.textMuted, marginRight: SPACING.md },
   sleepStars: { flexDirection: 'row', gap: 2 },
+
+  // Insufficient data
+  insufficientWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: SPACING.xl, gap: SPACING.md },
+  insufficientIconOuter: {
+    width: 120, height: 120, borderRadius: 60,
+    backgroundColor: COLORS.primaryGlow,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: SPACING.xs,
+  },
+  insufficientIconInner: {
+    width: 80, height: 80, borderRadius: 40,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1, borderColor: COLORS.borderBright,
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#6B46C1',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 14,
+    elevation: 8,
+  },
+  insufficientTitle: { fontSize: FONT_SIZES.xl, fontWeight: '700', color: COLORS.text, textAlign: 'center' },
+  insufficientSub: { fontSize: FONT_SIZES.sm, color: COLORS.textMuted, textAlign: 'center', lineHeight: 22 },
+  insufficientBtn: { borderRadius: RADIUS.full, overflow: 'hidden', marginTop: SPACING.sm, shadowColor: '#6B46C1', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 10, elevation: 8 },
+  insufficientBtnGrad: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs, paddingHorizontal: SPACING.xl, paddingVertical: SPACING.sm + 2 },
+  insufficientBtnText: { color: '#fff', fontWeight: '700', fontSize: FONT_SIZES.sm },
 });

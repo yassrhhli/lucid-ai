@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useDreams } from '@/hooks/useDreams';
 import { EmotionPicker } from '@/components/dream/EmotionPicker';
 import { SleepQualitySlider } from '@/components/dream/SleepQualitySlider';
@@ -22,6 +23,7 @@ import { showErrorAlert } from '@/utils/errorHandler';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
 import { checkRateLimit } from '@/utils/rateLimit';
 import { sanitizeDreamContent, sanitizeTitle } from '@/utils/sanitize';
+import { haptics } from '@/utils/haptics';
 import type { Emotion, SleepQuality } from '@/types/dream';
 
 export default function EditDreamScreen() {
@@ -77,11 +79,23 @@ export default function EditDreamScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.cancelBtn} accessibilityLabel="Cancel" accessibilityRole="button">
+          <TouchableOpacity
+            onPress={() => { haptics.light(); router.back(); }}
+            style={styles.cancelBtn}
+            accessibilityLabel="Cancel"
+            accessibilityRole="button"
+          >
             <Text style={styles.cancelText}>Cancel</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Edit Dream</Text>
-          <TouchableOpacity onPress={handleSave} disabled={isSaving} style={styles.saveBtn}>
+          <TouchableOpacity
+            onPress={() => { haptics.light(); handleSave(); }}
+            disabled={isSaving}
+            style={styles.saveBtn}
+            accessibilityLabel="Save changes"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: isSaving }}
+          >
             {isSaving
               ? <ActivityIndicator size="small" color={COLORS.primary} />
               : <Text style={styles.saveText}>Save</Text>}
@@ -127,21 +141,27 @@ export default function EditDreamScreen() {
 
           <View style={styles.divider} />
 
-          {[
-            { key: 'lucid', label: '✨ Lucid Dream', value: isLucid, onChange: setIsLucid },
-            { key: 'recurring', label: '🔄 Recurring', value: isRecurring, onChange: setIsRecurring },
-            { key: 'public', label: 'Share Anonymously', value: isPublic, onChange: setIsPublic },
-          ].map(({ key, label, value, onChange }) => (
-            <View key={key} style={styles.toggleRow}>
-              <Text style={styles.toggleLabel}>{label}</Text>
-              <Switch
-                value={value}
-                onValueChange={onChange}
-                trackColor={{ false: COLORS.border, true: COLORS.primary + '80' }}
-                thumbColor={value ? COLORS.primary : COLORS.textMuted}
-              />
-            </View>
-          ))}
+          <View style={styles.togglesCard}>
+            {[
+              { key: 'lucid',     icon: 'sparkles' as const, iconColor: COLORS.accent, label: 'Lucid Dream',       value: isLucid,     onChange: setIsLucid     },
+              { key: 'recurring', icon: 'refresh' as const,  iconColor: COLORS.gold,   label: 'Recurring Dream',   value: isRecurring, onChange: setIsRecurring },
+              { key: 'public',    icon: 'people' as const,   iconColor: COLORS.teal,   label: 'Share Anonymously', value: isPublic,    onChange: setIsPublic, last: true },
+            ].map(({ key, icon, iconColor, label, value, onChange, last }) => (
+              <View key={key} style={[styles.toggleRow, !last && styles.toggleBorder]}>
+                <View style={styles.toggleLabelRow}>
+                  <Ionicons name={icon} size={16} color={iconColor} />
+                  <Text style={styles.toggleLabel}>{label}</Text>
+                </View>
+                <Switch
+                  value={value}
+                  onValueChange={(v) => { haptics.selection(); onChange(v); }}
+                  trackColor={{ false: COLORS.borderSubtle, true: COLORS.primary + 'AA' }}
+                  thumbColor={value ? '#fff' : COLORS.textMuted}
+                  ios_backgroundColor={COLORS.borderSubtle}
+                />
+              </View>
+            ))}
+          </View>
 
           <View style={{ height: 60 }} />
         </ScrollView>
@@ -161,10 +181,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  cancelBtn: { padding: SPACING.xs },
+  cancelBtn: { minWidth: 44, minHeight: 44, justifyContent: 'center' },
   cancelText: { color: COLORS.textMuted, fontSize: FONT_SIZES.md },
   headerTitle: { fontSize: FONT_SIZES.md, fontWeight: '700', color: COLORS.text },
-  saveBtn: { padding: SPACING.xs },
+  saveBtn: { minWidth: 44, minHeight: 44, alignItems: 'flex-end', justifyContent: 'center' },
   saveText: { color: COLORS.primary, fontSize: FONT_SIZES.md, fontWeight: '700' },
   scroll: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.md },
   titleInput: {
@@ -182,11 +202,14 @@ const styles = StyleSheet.create({
     minHeight: 180,
     paddingTop: 0,
   },
+  togglesCard: { backgroundColor: COLORS.surface, borderRadius: RADIUS.xl, borderWidth: 1, borderColor: COLORS.borderSubtle, overflow: 'hidden' },
   toggleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: SPACING.sm,
+    padding: SPACING.md,
   },
+  toggleBorder: { borderBottomWidth: 1, borderBottomColor: COLORS.borderSubtle },
+  toggleLabelRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   toggleLabel: { fontSize: FONT_SIZES.md, color: COLORS.text, fontWeight: '500' },
 });

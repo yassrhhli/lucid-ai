@@ -12,11 +12,13 @@ import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { showErrorAlert } from '@/utils/errorHandler';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 
 const schema = z.object({
   email: z.string().email('Invalid email address'),
@@ -52,13 +54,22 @@ export default function ForgotPasswordScreen() {
       />
 
       <View style={styles.content}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Text style={styles.backText}>← Back</Text>
+        <TouchableOpacity
+          onPress={() => { haptics.light(); router.back(); }}
+          style={styles.backButton}
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="arrow-back" size={20} color={COLORS.primary} />
+          <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
 
         {!sent ? (
           <>
-            <Text style={styles.emoji}>🔑</Text>
+            <View style={styles.iconWrap}>
+              <Ionicons name="key-outline" size={36} color={COLORS.accent} />
+            </View>
             <Text style={styles.title}>Reset Password</Text>
             <Text style={styles.subtitle}>
               Enter your email and we'll send you a reset link.
@@ -95,7 +106,9 @@ export default function ForgotPasswordScreen() {
           </>
         ) : (
           <>
-            <Text style={styles.emoji}>✅</Text>
+            <View style={[styles.iconWrap, styles.iconWrapSuccess]}>
+              <Ionicons name="checkmark-circle" size={36} color={COLORS.teal} />
+            </View>
             <Text style={styles.title}>Email Sent!</Text>
             <Text style={styles.subtitle}>
               We sent a reset link to{'\n'}
@@ -128,6 +141,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   backButton: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
     alignSelf: 'flex-start',
     marginBottom: SPACING['2xl'],
   },
@@ -136,10 +150,15 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.md,
     fontWeight: '500',
   },
-  emoji: {
-    fontSize: 64,
+  iconWrap: {
+    width: 88, height: 88, borderRadius: 26,
+    backgroundColor: COLORS.primaryGlow, borderWidth: 1, borderColor: COLORS.borderBright,
+    alignItems: 'center', justifyContent: 'center',
+    alignSelf: 'center',
     marginBottom: SPACING.lg,
-    textAlign: 'center',
+  },
+  iconWrapSuccess: {
+    backgroundColor: 'rgba(45,212,191,0.12)', borderColor: 'rgba(45,212,191,0.3)',
   },
   title: {
     fontSize: FONT_SIZES['3xl'],

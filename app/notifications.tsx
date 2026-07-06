@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONT_SIZES, SPACING, RADIUS } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 
 import { useAuth } from '@/hooks/useAuth';
 import { scheduleDreamReminder, cancelDreamReminder } from '@/utils/notifications';
@@ -62,7 +63,12 @@ export default function NotificationsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} accessibilityLabel="Go back" accessibilityRole="button">
+        <TouchableOpacity
+          onPress={() => { haptics.light(); router.back(); }}
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
           <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
         </TouchableOpacity>
         <Text style={styles.title}>Notifications</Text>
@@ -83,7 +89,7 @@ export default function NotificationsScreen() {
               </View>
               <Switch
                 value={item.value}
-                onValueChange={item.onChange}
+                onValueChange={(v) => { haptics.selection(); item.onChange(v); }}
                 trackColor={{ false: COLORS.border, true: COLORS.primary }}
                 thumbColor="#fff"
               />
