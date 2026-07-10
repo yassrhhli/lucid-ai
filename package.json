@@ -18,7 +18,7 @@
     "@shopify/flash-list": "1.7.6",
     "@supabase/supabase-js": "^2.43.4",
     "date-fns": "^3.6.0",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.6.1",
     "expo": "53",
     "expo-av": "~15.1.7",
     "expo-blur": "~14.1.5",
